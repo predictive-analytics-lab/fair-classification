@@ -1,28 +1,12 @@
 import os,sys
 import numpy as np
-from prepare_adult_data import *
 sys.path.insert(0, '../../fair_classification/') # the code for fair classification is in this directory
 import utils as ut
 import loss_funcs as lf # loss funcs that can be optimized subject to various constraints
 import json
 
-mode_settings = {
-    # this means regular logistic regression
-    'unconstrained': {},
-    # this means optimize for accuracy while constrained to perfect fairness
-    'fairness': {"fairness": 1},
-    # this means optimize for fairness subject to a given loss in accuracy
-    'accuracy': {"accuracy": 1,
-                 "gamma": 0.5},
-    # this means 'constraint to no positive misclassifications'
-    'constraint': {"accuracy": 1,
-                   "separation": 1,
-                   "gamma": 1000}
-    }
-
-def train_classifier(x, y, control, sensitive_attrs, mode, sensitive_attrs_to_cov_thresh={}):
+def train_classifier(x, y, control, sensitive_attrs, mode, sensitive_attrs_to_cov_thresh):
     loss_function = lf._logistic_loss
-    mode = mode_settings[mode]
     w = ut.train_model(
         x, y, control, loss_function,
         mode.get('fairness', 0),
@@ -37,6 +21,9 @@ def get_accuracy(y, Y_predicted):
     correct_answers = (Y_predicted == y).astype(int) # will have 1 when the prediction and the actual label match
     accuracy = float(sum(correct_answers)) / float(len(correct_answers))
     return accuracy, sum(correct_answers)
+
+def predict(model, x):
+    return np.sign(np.dot(x, model))
 
 def check_accuracy(model, x, y):
     predicted = np.sign(np.dot(x, model))
@@ -55,10 +42,10 @@ def load_json(filename):
     f = json.load(open(filename))
     x = np.array(f["x"])
     y = np.array(f["class"])
-    sensitive = dict((k, np.array(v)) for (k,v) in f["sensitive"].iteritems())
+    sensitive = dict((k, np.array(v)) for (k,v) in f["sensitive"].items())
     return x, y, sensitive
 
-def main(train_file, test_file):
+def main(train_file, test_file, output_file, setting, value):
     x_train, y_train, x_control_train = load_json(train_file)
     x_test, y_test, x_control_test = load_json(test_file)
 
@@ -68,22 +55,43 @@ def main(train_file, test_file):
 
     # x_train, y_train, x_control_train, x_test, y_test, x_control_test = ut.split_into_train_test(X, y, x_control, 0.7)
 
-    print >> sys.stderr, "Will train classifier on %s %s-d points" % x_train.shape
+    # print >> sys.stderr, "First row:"
+    # print >> sys.stderr, x_train[0,:], y_train[0], x_control_train
+
+    if setting == 'gamma':
+        mode = {"accuracy": 1, "gamma": float(value)}
+    elif setting == 'c':
+        mode = {"fairness": 1}
+    elif setting == 'baseline':
+        mode = {}
+    else:
+        raise Exception("Don't know how to handle setting %s" % setting)
+
+    thresh = {}
+    if setting == 'c':
+        thresh = dict((k, float(value)) for (k, v) in x_control_train.items())
+        # print("Covariance threshold: %s" % thresh)
+
+    # print("Will train classifier on %s %s-d points" % x_train.shape, file=sys.stderr)
+    # print("Sensitive attribute: %s" % (x_control_train.keys(),), file=sys.stderr)
+    sensitive_attrs = list(x_control_train.keys())
     w = train_classifier(x_train, y_train, x_control_train,
-                         ["sex"], "fairness",
-                         {"sex": 0} # allow zero covariance between sex and decision
-                         )
-    print "ok, ran."
+                         sensitive_attrs, mode,
+                         thresh)
 
-    print "Train performance:"
-    print test_classifier(w, x_train, y_train, x_control_train, ["sex"])
+    # print("Model trained successfully.", file=sys.stderr)
 
-    print "Test performance:"
-    print test_classifier(w, x_test, y_test, x_control_test, ["sex"])
+    predictions = predict(w, x_test).tolist()
+    output_file = open(output_file, "w")
+    json.dump(predictions, output_file)
+    output_file.close()
+
+
 
 ##############################################################################
 # we prefer simple IO to efficient IO, so everything goes in json
 
+# from prepare_adult_data import *
 def write_adult_data_to_disk():
     X, y, x_control = load_adult_data() # set the argument to none, or no arguments if you want to test with the whole data -- we are subsampling for performance speedup
     x_train, y_train, x_control_train, x_test, y_test, x_control_test = ut.split_into_train_test(X, y, x_control, 0.7)
@@ -102,5 +110,5 @@ def write_adult_data_to_disk():
     test_out.close()
 
 if __name__ == '__main__':
-    # write_adult_data_to_disk()
-    main(sys.argv[1], sys.argv[2])
+    main(*sys.argv[1:])
+    exit(0)
