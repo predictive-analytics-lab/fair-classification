@@ -9,9 +9,8 @@ verify_ssl = true
 scikit-learn = "==0.19.1"
 cvxpy = "*"
 dccp = "*"
-numpy = "==1.16.4"
-scipy = "==1.2.2"
-matplotlib = "==2.0.0"
+numpy = "*"
+scipy = "*"
 
 [requires]
 python_version = "2.7"
