@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "fair-classification"
+version = "0.1.0"
+description = "Zafar et al.'s fairness method"
+authors = ["Zafar et al."]
+license = "GPL v3"
+
+[tool.poetry.dependencies]
+python = "^2.7.17"
+CVXcanon = "0.1.1"
+cvxpy = "0.4.11"
+dccp = "0.1.6"
+dill = "0.3.0"
+ecos = "2.0.7.post1"
+fastcache = "1.1.0"
+multiprocess = "0.70.8"
+numpy = "1.16.4"
+scikit-learn = "0.19.1"
+scipy = "1.2.2"
+scs = "2.1.1.post2"
+six = "1.12.0"
+toolz = "0.10.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
