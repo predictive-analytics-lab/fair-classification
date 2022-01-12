@@ -41,7 +41,7 @@ class _ZafarAlgorithmBase(InstalledModel):
             dir_name=".",
             # url="https://github.com/predictive-analytics-lab/fair-classification.git",
             top_dir=".",
-            executable="/home/tmk/.conda/envs/zafar/bin/python",  # has to be python 2.7
+            # executable="/home/tmk/.conda/envs/zafar/bin/python",  # has to be python 2.7
         )
         self._sub_dir = sub_dir
         self._fit_params: Optional[FitParams] = None
@@ -250,12 +250,12 @@ def main():
     assert model is not None
 
     predictions: Prediction = model.run(train, test)
-    expected_num_pos = 42
+    expected_num_pos = 41
     assert count_true(predictions.hard.values == 1) == expected_num_pos
     assert count_true(predictions.hard.values == 0) == len(predictions) - expected_num_pos
 
     predictions = model.run(train, test)
-    expected_num_pos = 42
+    expected_num_pos = 41
     assert count_true(predictions.hard.values == 1) == expected_num_pos
     assert count_true(predictions.hard.values == 0) == len(predictions) - expected_num_pos
 
@@ -272,7 +272,7 @@ def main():
 
     best_result = cv_results.get_best_in_top_k(primary, fair_measure, top_k=3)
 
-    assert best_result.params["gamma"] == 1e-1
+    assert best_result.params["gamma"] == 1
     # assert best_result.scores["Accuracy"] == approx(0.956, abs=1e-3)
     # assert best_result.scores["CV absolute"] == approx(0.834, abs=1e-3)
 

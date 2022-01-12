@@ -7,12 +7,12 @@ from main import load_json, predict
 sys.path.insert(0, '../../fair_classification/') # the code for fair classification is in this directory
 import utils as ut
 
+
 def main(test_file, model_path, output_file):
     x_test, y_test, x_control_test = load_json(test_file)
 
     # X = ut.add_intercept(X) # add intercept to X before applying the linear classifier
     x_test = ut.add_intercept(x_test)
-
 
     w = np.load(model_path)
 
