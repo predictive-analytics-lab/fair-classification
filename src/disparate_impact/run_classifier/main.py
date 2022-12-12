@@ -1,10 +1,13 @@
+from typing import Tuple, Dict
 import json
 import sys
 
 import numpy as np
+from numpy import typing as npt
 
 import src.fair_classification.loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
 import src.fair_classification.utils as ut
+from src.types import Setting, DataFile
 
 
 def train_classifier(
@@ -59,17 +62,19 @@ def test_classifier(w, x, y, control, sensitive_attrs):
     return p_rule, test_score
 
 
-def load_json(filename):
-    f = json.load(open(filename))
+def load_json(filename: str) -> Tuple[npt.NDArray, npt.NDArray, Dict[str, npt.NDArray]]:
+    f: DataFile = json.load(open(filename))
     x = np.array(f["x"])
     y = np.array(f["class"])
     sensitive = {k: np.array(v) for (k, v) in f["sensitive"].items()}
     return x, y, sensitive
 
 
-def main(train_file, test_file, output_file, setting, value):
+def main(
+    train_file: str, test_file: str, output_file: str, setting: Setting, value: str
+) -> None:
     x_train, y_train, x_control_train = load_json(train_file)
-    x_test, y_test, x_control_test = load_json(test_file)
+    x_test, _, _ = load_json(test_file)
 
     # X = ut.add_intercept(X) # add intercept to X before applying the linear classifier
     x_train = ut.add_intercept(x_train)
@@ -104,9 +109,9 @@ def main(train_file, test_file, output_file, setting, value):
     # print("Model trained successfully.", file=sys.stderr)
 
     predictions = predict(w, x_test).tolist()
-    output_file = open(output_file, "w")
-    json.dump(predictions, output_file)
-    output_file.close()
+    output_fp = open(output_file, "w")
+    json.dump(predictions, output_fp)
+    output_fp.close()
 
 
 ##############################################################################
