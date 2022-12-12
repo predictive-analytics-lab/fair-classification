@@ -1,7 +1,8 @@
 import math
-import numpy as np
-import matplotlib.pyplot as plt  # for plotting stuff
 from random import seed, shuffle
+
+import matplotlib.pyplot as plt  # for plotting stuff
+import numpy as np
 from scipy.stats import multivariate_normal  # generating synthetic data
 
 SEED = 1122334455

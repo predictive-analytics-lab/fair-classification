@@ -1,7 +1,7 @@
 from generate_synthetic_data import generate_synthetic_data
 
-import src.fair_classification.utils as ut
 import src.fair_classification.loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
+import src.fair_classification.utils as ut
 
 NUM_FOLDS = (
     10  # we will show 10-fold cross validation accuracy as a performance measure

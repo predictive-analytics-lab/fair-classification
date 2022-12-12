@@ -1,9 +1,10 @@
-import numpy as np
-from random import seed, shuffle
-from scipy.optimize import minimize  # for loss func minimization
-from multiprocessing import Process, Queue
 from collections import defaultdict
 from copy import deepcopy
+from multiprocessing import Process, Queue
+from random import seed, shuffle
+
+import numpy as np
+from scipy.optimize import minimize  # for loss func minimization
 
 SEED = 1122334455
 # set the random seed so that the random permutations can be reproduced again

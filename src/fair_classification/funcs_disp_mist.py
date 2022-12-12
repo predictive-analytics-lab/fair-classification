@@ -1,14 +1,15 @@
 import sys
 import traceback
-import numpy as np
-from random import seed
 from copy import deepcopy
-from cvxpy import sum, multiply, logistic, minimum
-from cvxpy.expressions.variable import Variable
-from cvxpy.problems.problem import Problem
-from cvxpy.problems.objective import Minimize
-import utils as ut
+from random import seed
+
 import matplotlib.pyplot as plt
+import numpy as np
+import utils as ut
+from cvxpy import logistic, minimum, multiply, sum
+from cvxpy.expressions.variable import Variable
+from cvxpy.problems.objective import Minimize
+from cvxpy.problems.problem import Problem
 
 SEED = 1122334455
 # set the random seed so that the random permutations can be reproduced again

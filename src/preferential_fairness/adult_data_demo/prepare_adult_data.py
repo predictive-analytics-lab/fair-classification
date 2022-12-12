@@ -1,7 +1,10 @@
 import os
-import urllib.request, urllib.error, urllib.parse
-import numpy as np
+import urllib.error
+import urllib.parse
+import urllib.request
 from random import seed, shuffle
+
+import numpy as np
 from sklearn import preprocessing
 
 SEED = 1122

@@ -1,6 +1,7 @@
 import math
-import numpy as np
 from random import seed, shuffle
+
+import numpy as np
 from scipy.stats import multivariate_normal  # generating synthetic data
 
 

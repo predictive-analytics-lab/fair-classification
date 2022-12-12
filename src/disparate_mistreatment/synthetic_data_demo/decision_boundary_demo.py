@@ -1,8 +1,8 @@
+import plot_syn_boundaries as psb
 from generate_synthetic_data import generate_synthetic_data
 
-import src.fair_classification.utils as ut
 import src.fair_classification.funcs_disp_mist as fdm
-import plot_syn_boundaries as psb
+import src.fair_classification.utils as ut
 
 
 def test_synthetic_data():

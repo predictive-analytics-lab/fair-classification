@@ -1,10 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt  # for plotting stuff
 from copy import deepcopy
+
+import matplotlib.pyplot as plt  # for plotting stuff
+import numpy as np
 from generate_synthetic_data import generate_synthetic_data
 
-import src.fair_classification.utils as ut
 import src.fair_classification.funcs_disp_mist as fdm
+import src.fair_classification.utils as ut
 
 
 def test_synthetic_data():

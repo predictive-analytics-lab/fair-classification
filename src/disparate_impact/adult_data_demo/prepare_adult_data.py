@@ -1,9 +1,12 @@
 import os
-import urllib.request, urllib.error, urllib.parse
+import urllib.error
+import urllib.parse
+import urllib.request
+from random import seed, shuffle
+
+import numpy as np
 
 import src.fair_classification.utils as ut
-import numpy as np
-from random import seed, shuffle
 
 SEED = 1122334455
 seed(

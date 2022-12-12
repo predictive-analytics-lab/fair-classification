@@ -1,13 +1,12 @@
-import numpy as np
-import matplotlib.pyplot as plt  # for plotting stuff
 from random import seed, shuffle
+
+import matplotlib.pyplot as plt  # for plotting stuff
+import numpy as np
 from scipy.stats import multivariate_normal  # generating synthetic data
 
 SEED = 1122334455
 # set the random seed so that the random permutations can be reproduced again
-seed(
-    SEED
-)  
+seed(SEED)
 np.random.seed(SEED)
 import src.fair_classification.utils as ut
 

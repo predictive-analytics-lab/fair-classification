@@ -1,8 +1,9 @@
-import numpy as np
-from sklearn.preprocessing import (
-    MaxAbsScaler,
-)  # normalize data with 0 and 1 as min/max absolute vals
 import traceback
+
+import numpy as np
+from sklearn.preprocessing import (  # normalize data with 0 and 1 as min/max absolute vals
+    MaxAbsScaler,
+)
 
 
 def get_acc_all(dist_arr, y):

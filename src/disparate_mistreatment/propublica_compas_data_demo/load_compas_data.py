@@ -1,10 +1,13 @@
-import urllib.request, urllib.error, urllib.parse
 import os
+import urllib.error
+import urllib.parse
+import urllib.request
+from collections import defaultdict
+from random import seed, shuffle
+
 import numpy as np
 import pandas as pd
-from collections import defaultdict
 from sklearn import preprocessing
-from random import seed, shuffle
 
 import src.fair_classification.utils as ut
 

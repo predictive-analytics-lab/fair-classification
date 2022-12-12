@@ -1,9 +1,10 @@
-import sys
 import json
+import sys
+
 import numpy as np
 
-import src.fair_classification.utils as ut
 import src.fair_classification.funcs_disp_mist as fdm
+import src.fair_classification.utils as ut
 
 
 def train_classifier(x, y, control, cons_params, eps):

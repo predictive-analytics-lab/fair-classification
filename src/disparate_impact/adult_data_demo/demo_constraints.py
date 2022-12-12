@@ -1,8 +1,8 @@
 import numpy as np
 from prepare_adult_data import load_adult_data
 
-import src.fair_classification.utils as ut
 import src.fair_classification.loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
+import src.fair_classification.utils as ut
 
 
 def test_adult_data():

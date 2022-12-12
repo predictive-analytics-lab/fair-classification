@@ -1,11 +1,11 @@
 import sys
-import numpy as np
 import traceback
 
-from cvxpy import sum, multiply, maximum, sum_squares, logistic
+import numpy as np
+from cvxpy import logistic, maximum, multiply, sum, sum_squares
 from cvxpy.expressions.variable import Variable
-from cvxpy.problems.problem import Problem
 from cvxpy.problems.objective import Minimize
+from cvxpy.problems.problem import Problem
 
 
 class LinearClf:

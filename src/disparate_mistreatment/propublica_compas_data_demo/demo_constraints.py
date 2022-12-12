@@ -1,7 +1,7 @@
 from load_compas_data import load_compas_data
 
-import src.fair_classification.utils as ut
 import src.fair_classification.funcs_disp_mist as fdm
+import src.fair_classification.utils as ut
 
 
 def test_compas_data():

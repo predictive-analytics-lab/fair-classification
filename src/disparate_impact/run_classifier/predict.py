@@ -1,8 +1,7 @@
-import sys
 import json
+import sys
 
 import numpy as np
-
 from main import load_json, predict
 
 import src.fair_classification.utils as ut

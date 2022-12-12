@@ -1,9 +1,10 @@
+import json
 import sys
+
 import numpy as np
 
-import src.fair_classification.utils as ut
 import src.fair_classification.loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
-import json
+import src.fair_classification.utils as ut
 
 
 def train_classifier(

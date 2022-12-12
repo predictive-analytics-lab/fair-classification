@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt  # for plotting stuff
+import numpy as np
 from generate_synthetic_data import generate_synthetic_data
 
-import src.fair_classification.utils as ut
 import src.fair_classification.loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
+import src.fair_classification.utils as ut
 
 
 def test_synthetic_data():

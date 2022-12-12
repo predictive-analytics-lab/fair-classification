@@ -2,12 +2,13 @@ import sys
 
 import numpy as np
 
-from main import load_json, train_classifier
-
 import src.fair_classification.utils as ut
+from src.types import Setting
+
+from .main import load_json, train_classifier
 
 
-def main(train_file, model_path, setting, value):
+def main(train_file, model_path, setting: Setting, value):
     x_train, y_train, x_control_train = load_json(train_file)
 
     # X = ut.add_intercept(X) # add intercept to X before applying the linear classifier

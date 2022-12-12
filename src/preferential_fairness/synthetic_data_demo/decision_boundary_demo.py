@@ -1,7 +1,6 @@
 from generate_synthetic_data import generate_synthetic_data
-from sklearn.model_selection import train_test_split
-
 from plot_synthetic_boundaries import plot_data
+from sklearn.model_selection import train_test_split
 
 import src.fair_classification.stats_pref_fairness as compute_stats
 from src.fair_classification.linear_clf_pref_fairness import LinearClf
