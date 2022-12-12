@@ -13,7 +13,7 @@ def test_synthetic_data():
 	""" Generate the synthetic data """
 	data_type = 1
 	X, y, x_control = generate_synthetic_data(data_type=data_type, plot_data=True) # set plot_data to False to skip the data plot
-	sensitive_attrs = x_control.keys()
+	sensitive_attrs = list(x_control.keys())
 
 	""" Split the data into train and test """
 	train_fold_size = 0.5
@@ -34,18 +34,18 @@ def test_synthetic_data():
 		
 
 	""" Classify the data while optimizing for accuracy """
-	print
-	print "== Unconstrained (original) classifier =="
+	print()
+	print("== Unconstrained (original) classifier ==")
 	w_uncons, acc_uncons, s_attr_to_fp_fn_test_uncons = train_test_classifier()
-	print "\n-----------------------------------------------------------------------------------\n"
+	print("\n-----------------------------------------------------------------------------------\n")
 
 	""" Now classify such that we optimize for accuracy while achieving perfect fairness """
 	
-	print
-	print "== Classifier with fairness constraint =="
+	print()
+	print("== Classifier with fairness constraint ==")
 
 
-	print "\n\n=== Constraints on FPR ==="	# setting parameter for constraints
+	print("\n\n=== Constraints on FPR ===")	# setting parameter for constraints
 	cons_type = 1 # FPR constraint -- just change the cons_type, the rest of parameters should stay the same
 	tau = 5.0
 	mu = 1.2
@@ -57,23 +57,23 @@ def test_synthetic_data():
 
 	w_cons, acc_cons, s_attr_to_fp_fn_test_cons  = train_test_classifier()
 	psb.plot_boundaries(X, y, x_control, [w_uncons, w_cons], [acc_uncons, acc_cons], [s_attr_to_fp_fn_test_uncons["s1"], s_attr_to_fp_fn_test_cons["s1"]], "img/syn_cons_dtype_%d_cons_type_%d.png"%(data_type, cons_type) )
-	print "\n-----------------------------------------------------------------------------------\n"
+	print("\n-----------------------------------------------------------------------------------\n")
 
-	print "\n\n=== Constraints on FNR ==="
+	print("\n\n=== Constraints on FNR ===")
 	cons_type = 2
 	cons_params["cons_type"] = cons_type # FNR constraint -- just change the cons_type, the rest of parameters should stay the same
 	w_cons, acc_cons, s_attr_to_fp_fn_test_cons  = train_test_classifier()
 	psb.plot_boundaries(X, y, x_control, [w_uncons, w_cons], [acc_uncons, acc_cons], [s_attr_to_fp_fn_test_uncons["s1"], s_attr_to_fp_fn_test_cons["s1"]], "img/syn_cons_dtype_%d_cons_type_%d.png"%(data_type, cons_type) )
-	print "\n-----------------------------------------------------------------------------------\n"
+	print("\n-----------------------------------------------------------------------------------\n")
 
 
 
-	print "\n\n=== Constraints on both FPR and FNR ==="
+	print("\n\n=== Constraints on both FPR and FNR ===")
 	cons_type = 4
 	cons_params["cons_type"] = cons_type # both FPR and FNR constraints
 	w_cons, acc_cons, s_attr_to_fp_fn_test_cons  = train_test_classifier()
 	psb.plot_boundaries(X, y, x_control, [w_uncons, w_cons], [acc_uncons, acc_cons], [s_attr_to_fp_fn_test_uncons["s1"], s_attr_to_fp_fn_test_cons["s1"]], "img/syn_cons_dtype_%d_cons_type_%d.png"%(data_type, cons_type) )
-	print "\n-----------------------------------------------------------------------------------\n"
+	print("\n-----------------------------------------------------------------------------------\n")
 
 
 	return

@@ -1,4 +1,4 @@
-from __future__ import division
+
 import os,sys
 import traceback
 import numpy as np
@@ -166,12 +166,12 @@ def get_clf_stats(w, x_train, y_train, x_control_train, x_test, y_test, x_contro
         cov_all_train[s_attr] = get_sensitive_attr_constraint_fpr_fnr_cov(None, x_train, y_train, distances_boundary_train, x_control_train[s_attr]) 
         
 
-        print "\n"
-        print "Accuracy: %0.3f" % (test_score)
+        print("\n")
+        print("Accuracy: %0.3f" % (test_score))
         print_stats = True # only print stats for the test fold
         s_attr_to_fp_fn_test = get_fpr_fnr_sensitive_features(y_test, all_class_labels_assigned_test, x_control_test, sensitive_attrs, print_stats)
         cov_all_test[s_attr] = get_sensitive_attr_constraint_fpr_fnr_cov(None, x_test, y_test, distances_boundary_test, x_control_test[s_attr]) 
-        print "\n"
+        print("\n")
 
     return train_score, test_score, cov_all_train, cov_all_test, s_attr_to_fp_fn_train, s_attr_to_fp_fn_test
 
@@ -184,7 +184,7 @@ def get_distance_boundary(w, x, s_attr_arr):
 
     distances_boundary = np.zeros(x.shape[0])
     if isinstance(w, dict): # if we have separate weight vectors per group
-        for k in w.keys(): # for each w corresponding to each sensitive group
+        for k in list(w.keys()): # for each w corresponding to each sensitive group
             d = np.dot(x, w[k])
             distances_boundary[s_attr_arr == k] = d[s_attr_arr == k] # set this distance only for people with this sensitive attr val
     else: # we just learn one w for everyone else
@@ -208,7 +208,7 @@ def get_constraint_list_cov(x_train, y_train, x_control_train, sensitive_attrs_t
     """
 
     constraints = []
-    for attr in sensitive_attrs_to_cov_thresh.keys():
+    for attr in list(sensitive_attrs_to_cov_thresh.keys()):
 
         attr_arr = x_control_train[attr]
         attr_arr_transformed, index_dict = ut.get_one_hot_encoding(attr_arr)
@@ -287,7 +287,7 @@ def get_fpr_fnr_sensitive_features(y_true, y_pred, x_control, sensitive_attrs, v
         s_attr_to_fp_fn[s] = {}
         s_attr_vals = x_control_internal[s]
         if verbose == True:
-            print "||  s  || FPR. || FNR. ||"
+            print("||  s  || FPR. || FNR. ||")
         for s_val in sorted(list(set(s_attr_vals))):
             s_attr_to_fp_fn[s][s_val] = {}
             y_true_local = y_true[s_attr_vals==s_val]
@@ -320,7 +320,7 @@ def get_fpr_fnr_sensitive_features(y_true, y_pred, x_control, sensitive_attrs, v
             if verbose == True:
                 if isinstance(s_val, float): # print the int value of the sensitive attr val
                     s_val = int(s_val)
-                print "||  %s  || %0.2f || %0.2f ||" % (s_val, fpr, fnr)
+                print("||  %s  || %0.2f || %0.2f ||" % (s_val, fpr, fnr))
 
         
         return s_attr_to_fp_fn
@@ -392,7 +392,7 @@ def get_sensitive_attr_constraint_fpr_fnr_cov(model, x_arr, y_arr_true, y_arr_di
         cov_type_name = cons_type_to_name[cons_type]    
         cov = cons_sum_dict[cons_type][1] - cons_sum_dict[cons_type][0]
         if verbose == True:
-            print "Covariance for type '%s' is: %0.7f" %(cov_type_name, cov)
+            print("Covariance for type '%s' is: %0.7f" %(cov_type_name, cov))
         
     return cons_sum_dict
     
@@ -415,14 +415,14 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
     test_acc_arr, train_acc_arr, correlation_dict_test_arr, correlation_dict_train_arr, cov_dict_test_arr, cov_dict_train_arr = compute_cross_validation_error(x_all, y_all, x_control_all, num_folds, loss_function, 0, apply_accuracy_constraint, sep_constraint, sensitive_attrs, [{} for i in range(0,num_folds)], 0)
 
     for c in cov_range:
-        print "LOG: testing for multiplicative factor: %0.2f" % c
+        print("LOG: testing for multiplicative factor: %0.2f" % c)
         sensitive_attrs_to_cov_original_arr_multiplied = []
         for sensitive_attrs_to_cov_original in cov_dict_train_arr:
             sensitive_attrs_to_cov_thresh = deepcopy(sensitive_attrs_to_cov_original)
-            for k in sensitive_attrs_to_cov_thresh.keys():
+            for k in list(sensitive_attrs_to_cov_thresh.keys()):
                 v = sensitive_attrs_to_cov_thresh[k]
-                if type(v) == type({}):
-                    for k1 in v.keys():
+                if isinstance(v, dict):
+                    for k1 in list(v.keys()):
                         v[k1] = v[k1] * c
                 else:
                     sensitive_attrs_to_cov_thresh[k] = v * c
@@ -439,7 +439,7 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
         # just plot the correlations for the first sensitive attr, the plotting can be extended for the other values, but as a proof of concept, we will jsut show for one
         s = sensitive_attrs[0]    
         
-        for k,v in correlation_dict_test[s].items():
+        for k,v in list(correlation_dict_test[s].items()):
             if v.get(positive_class_label) is None:
                 positive_per_category[k].append(0.0)
             else:

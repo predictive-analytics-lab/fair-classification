@@ -13,7 +13,7 @@ def test_compas_data():
 	""" Generate the synthetic data """
 	data_type = 1
 	X, y, x_control = load_compas_data()
-	sensitive_attrs = x_control.keys()
+	sensitive_attrs = list(x_control.keys())
 
 	
 	""" Split the data into train and test """
@@ -35,16 +35,16 @@ def test_compas_data():
 		
 
 	""" Classify the data while optimizing for accuracy """
-	print
-	print "== Unconstrained (original) classifier =="
+	print()
+	print("== Unconstrained (original) classifier ==")
 	w_uncons, acc_uncons, s_attr_to_fp_fn_test_uncons = train_test_classifier()
-	print "\n-----------------------------------------------------------------------------------\n"
+	print("\n-----------------------------------------------------------------------------------\n")
 
 	""" Now classify such that we optimize for accuracy while achieving perfect fairness """
 	
-	print
+	print()
 	
-	print "\n\n== Constraints on FPR =="	# setting parameter for constraints
+	print("\n\n== Constraints on FPR ==")	# setting parameter for constraints
 	cons_type = 1 # FPR constraint -- just change the cons_type, the rest of parameters should stay the same
 	tau = 5.0
 	mu = 1.2
@@ -55,7 +55,7 @@ def test_compas_data():
 					"sensitive_attrs_to_cov_thresh": sensitive_attrs_to_cov_thresh}
 
 	w_cons, acc_cons, s_attr_to_fp_fn_test_cons  = train_test_classifier()
-	print "\n-----------------------------------------------------------------------------------\n"
+	print("\n-----------------------------------------------------------------------------------\n")
 
 	return
 

@@ -1,5 +1,5 @@
-from __future__ import division
-import urllib2
+
+import urllib.request, urllib.error, urllib.parse
 import os,sys
 import numpy as np
 import pandas as pd
@@ -22,19 +22,19 @@ np.random.seed(SEED)
 
 def check_data_file(fname):
     files = os.listdir(".") # get the current directory listing
-    print "Looking for file '%s' in the current directory..." % fname
+    print("Looking for file '%s' in the current directory..." % fname)
 
     if fname not in files:
-        print "'%s' not found! Downloading from GitHub..." % fname
+        print("'%s' not found! Downloading from GitHub..." % fname)
         addr = "https://raw.githubusercontent.com/propublica/compas-analysis/master/compas-scores-two-years.csv"
-        response = urllib2.urlopen(addr)
+        response = urllib.request.urlopen(addr)
         data = response.read()
         fileOut = open(fname, "w")
         fileOut.write(data)
         fileOut.close()
-        print "'%s' download and saved locally.." % fname
+        print("'%s' download and saved locally.." % fname)
     else:
-        print "File found in current directory.."
+        print("File found in current directory..")
     
 
 def load_compas_data():
@@ -54,7 +54,7 @@ def load_compas_data():
 	
 	# convert to np array
 	data = df.to_dict('list')
-	for k in data.keys():
+	for k in list(data.keys()):
 		data[k] = np.array(data[k])
 
 
@@ -78,7 +78,7 @@ def load_compas_data():
 	idx = np.logical_and(idx, np.logical_or(data["race"] == "African-American", data["race"] == "Caucasian"))
 
 	# select the examples that satisfy this criteria
-	for k in data.keys():
+	for k in list(data.keys()):
 		data[k] = data[k][idx]
 
 
@@ -91,9 +91,9 @@ def load_compas_data():
 
 	
 	
-	print "\nNumber of people recidivating within two years"
-	print pd.Series(y).value_counts()
-	print "\n"
+	print("\nNumber of people recidivating within two years")
+	print(pd.Series(y).value_counts())
+	print("\n")
 
 
 	X = np.array([]).reshape(len(y), 0) # empty array with num rows same as num examples, will hstack the features to it
@@ -132,18 +132,18 @@ def load_compas_data():
 
 	# convert the sensitive feature to 1-d array
 	x_control = dict(x_control)
-	for k in x_control.keys():
+	for k in list(x_control.keys()):
 		assert(x_control[k].shape[1] == 1) # make sure that the sensitive feature is binary after one hot encoding
 		x_control[k] = np.array(x_control[k]).flatten()
 
 	# sys.exit(1)
 
 	"""permute the date randomly"""
-	perm = range(0,X.shape[0])
+	perm = list(range(0,X.shape[0]))
 	shuffle(perm)
 	X = X[perm]
 	y = y[perm]
-	for k in x_control.keys():
+	for k in list(x_control.keys()):
 		x_control[k] = x_control[k][perm]
 
 
@@ -151,7 +151,7 @@ def load_compas_data():
 
 	feature_names = ["intercept"] + feature_names
 	assert(len(feature_names) == X.shape[1])
-	print "Features we will be using for classification are:", feature_names, "\n"
+	print("Features we will be using for classification are:", feature_names, "\n")
 
 
 	return X, y, x_control

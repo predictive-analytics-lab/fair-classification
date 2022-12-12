@@ -1,4 +1,4 @@
-from __future__ import division
+
 import os,sys
 import numpy as np
 import traceback
@@ -184,8 +184,8 @@ class LinearClf():
                 try:
                     assert(f_c.value == True)
                 except:
-                    print "Assertion failed. Fairness constraints not satisfied."
-                    print traceback.print_exc()
+                    print("Assertion failed. Fairness constraints not satisfied.")
+                    print(traceback.print_exc())
                     sys.stdout.flush()
                     return
                     # sys.exit(1)
@@ -274,7 +274,7 @@ class LinearClf():
 
                 distance_boundary_arr[idx] = self.decision_function(X_g, attr) # each group gets decision with their own boundary
 
-                for k in self.w.keys(): 
+                for k in list(self.w.keys()): 
                     distances_boundary_dict[attr][k] = self.decision_function(X_g, k) # each group gets a decision with both boundaries
 
         return distance_boundary_arr, distances_boundary_dict
@@ -320,7 +320,7 @@ class LinearClf():
                 X_g = X[idx]
                 num_g = X_g.shape[0]
 
-                for k in w.keys(): # get the distance with each group's w
+                for k in list(w.keys()): # get the distance with each group's w
                     prod_dict[val][k] = sum_entries(  max_elemwise(0, X_g*w[k])   ) / num_g
 
                     

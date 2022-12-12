@@ -1,4 +1,4 @@
-from __future__ import division
+
 import os,sys
 import numpy as np
 from generate_synthetic_data import *
@@ -67,7 +67,7 @@ def test_synthetic_data():
 
 
 
-    print "\n\n== Unconstrained classifier =="
+    print("\n\n== Unconstrained classifier ==")
     # Train a classifier for each sensitive feature group separately optimizing accuracy for the respective group    
     clf_group = {} # will store the classifier for eah group here
     lam = {0:0.01, 1:0.01} # the regularization parameter -- we set small values here, in the paper, we cross validate all of regularization parameters
@@ -88,7 +88,7 @@ def test_synthetic_data():
 
 
     
-    print "\n\n== Parity classifier =="
+    print("\n\n== Parity classifier ==")
     cons_params["cons_type"] = 0
     clf = LinearClf(loss_function, lam=0.01, train_multiple=False)
     clf.fit(x_train, y_train, x_sensitive_train, cons_params)
@@ -101,7 +101,7 @@ def test_synthetic_data():
 
 
     
-    print "\n\n\n\n== Preferred impact classifier =="
+    print("\n\n\n\n== Preferred impact classifier ==")
 
 
     # Not all values of the lambda satisfy the constraints empirically (in terms of acceptace rates)
@@ -118,7 +118,7 @@ def test_synthetic_data():
 
 
     
-    print "\n\n\n\n== Preferred treatment AND preferred impact classifier =="
+    print("\n\n\n\n== Preferred treatment AND preferred impact classifier ==")
     cons_params["cons_type"] = 3
     cons_params["s_val_to_cons_sum"] = s_val_to_cons_sum_di
     lam = {0:2.5, 1:0.35}

@@ -14,7 +14,7 @@ def test_synthetic_data():
 	""" Generate the synthetic data """
 	data_type = 1
 	X, y, x_control = generate_synthetic_data(data_type=data_type, plot_data=False) # set plot_data to False to skip the data plot
-	sensitive_attrs = x_control.keys()
+	sensitive_attrs = list(x_control.keys())
 
 	""" Split the data into train and test """
 	train_fold_size = 0.5
@@ -36,15 +36,15 @@ def test_synthetic_data():
 		
 
 	""" Classify the data while optimizing for accuracy """
-	print
-	print "== Unconstrained (original) classifier =="
+	print()
+	print("== Unconstrained (original) classifier ==")
 	w_uncons, acc_uncons, s_attr_to_fp_fn_test_uncons, cov_all_train_uncons = train_test_classifier()
-	print "\n-----------------------------------------------------------------------------------\n"
+	print("\n-----------------------------------------------------------------------------------\n")
 
 	""" Now classify such that we optimize for accuracy while achieving perfect fairness """
 	
-	print
-	print "== Classifier with fairness constraint =="
+	print()
+	print("== Classifier with fairness constraint ==")
 
 	it = 0.05
 	mult_range = np.arange(1.0, 0.0-it, -it).tolist()
@@ -60,8 +60,8 @@ def test_synthetic_data():
 
 	for m in mult_range:
 		sensitive_attrs_to_cov_thresh = deepcopy(cov_all_train_uncons)
-		for s_attr in sensitive_attrs_to_cov_thresh.keys():
-			for cov_type in sensitive_attrs_to_cov_thresh[s_attr].keys():
+		for s_attr in list(sensitive_attrs_to_cov_thresh.keys()):
+			for cov_type in list(sensitive_attrs_to_cov_thresh[s_attr].keys()):
 				for s_val in sensitive_attrs_to_cov_thresh[s_attr][cov_type]:
 					sensitive_attrs_to_cov_thresh[s_attr][cov_type][s_val] *= m
 

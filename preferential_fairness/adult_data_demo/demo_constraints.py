@@ -1,4 +1,4 @@
-from __future__ import division
+
 import os,sys
 import numpy as np
 from prepare_adult_data import load_adult_data
@@ -42,7 +42,7 @@ def test_adult_data():
 
 
 
-    print "\n\n== Unconstrained classifier =="
+    print("\n\n== Unconstrained classifier ==")
     # Train a classifier for each sensitive feature group separately optimizing accuracy for the respective group    
     clf_group = {}
     lam = {0:1e-5, 1:1e-5} # the regularization parameter -- we set small values here, in the paper, we cross validate all of regularization parameters
@@ -63,7 +63,7 @@ def test_adult_data():
 
 
     
-    print "\n\n== Parity classifier =="
+    print("\n\n== Parity classifier ==")
     cons_params["cons_type"] = 0
     clf = LinearClf(loss_function, lam=1e-5, train_multiple=False)
     clf.fit(x_train, y_train, x_sensitive_train, cons_params)
@@ -76,7 +76,7 @@ def test_adult_data():
 
 
     
-    print "\n\n\n\n== Preferred impact classifier =="
+    print("\n\n\n\n== Preferred impact classifier ==")
 
     # Not all values of the lambda satisfy the constraints empirically (in terms of acceptace rates)
     # This is because the scale (or norm) of the group-conditional classifiers can be very different from the baseline parity classifier, and from each other. This affects the distance from boundary (w.x) used in the constraints.
@@ -96,7 +96,7 @@ def test_adult_data():
 
    
     
-    print "\n\n\n\n== Preferred treatment AND preferred impact classifier =="
+    print("\n\n\n\n== Preferred treatment AND preferred impact classifier ==")
     cons_params["cons_type"] = 3
     cons_params["s_val_to_cons_sum"] = s_val_to_cons_sum_di
     lam = {0:1e-3, 1:2e-3} 

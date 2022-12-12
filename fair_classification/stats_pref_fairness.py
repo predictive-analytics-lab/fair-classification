@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 from sklearn.preprocessing import MaxAbsScaler # normalize data with 0 and 1 as min/max absolute vals
 import scipy
@@ -27,7 +27,7 @@ def get_clf_stats(dist_arr, dist_dict, y, x_sensitive, print_stats=False):
     acc = get_acc_all(dist_arr,y)
 
     if print_stats:
-        print "\n\n\nAccuracy: %0.3f\n" % acc
+        print("\n\n\nAccuracy: %0.3f\n" % acc)
 
         
     acc_stats = get_acc_stats(dist_dict, y, x_sensitive, print_stats)
@@ -101,7 +101,7 @@ def get_acc_stats(dist_dict, y, x_sensitive, verbose = False):
 
 
     if verbose == True:
-        print "||  s  ||   frac_pos  ||"
+        print("||  s  ||   frac_pos  ||")
 
 
     for s_val in set(x_sensitive):
@@ -127,7 +127,7 @@ def get_acc_stats(dist_dict, y, x_sensitive, verbose = False):
                 s_val = int(s_val)
 
 
-            print "||  %s  || %0.2f (%0.2f) ||" % (s_val, acc_stats[s_val][s_val]["frac_pos"], acc_stats[s_val][other_val]["frac_pos"])
+            print("||  %s  || %0.2f (%0.2f) ||" % (s_val, acc_stats[s_val][s_val]["frac_pos"], acc_stats[s_val][other_val]["frac_pos"]))
                 
 
 
@@ -156,8 +156,8 @@ def get_sensitive_attr_cov(dist_dict):
 
     s_val_to_cons_sum = {0:{}, 1:{}} # s_attr_group (0/1) -> w_group (0/1) -> ramp approx
     
-    for s_val in dist_dict.keys():
-        for w_group in dist_dict[s_val].keys():
+    for s_val in list(dist_dict.keys()):
+        for w_group in list(dist_dict[s_val].keys()):
             fx = dist_dict[s_val][w_group]            
             s_val_to_cons_sum[s_val][w_group] = np.sum( np.maximum(0, fx) ) / fx.shape[0]
             

@@ -42,7 +42,7 @@ def load_json(filename):
     f = json.load(open(filename))
     x = np.array(f["x"])
     y = np.array(f["class"])
-    sensitive = dict((k, np.array(v)) for (k,v) in f["sensitive"].items())
+    sensitive = dict((k, np.array(v)) for (k,v) in list(f["sensitive"].items()))
     return x, y, sensitive
 
 def main(train_file, test_file, output_file, setting, value):
@@ -69,7 +69,7 @@ def main(train_file, test_file, output_file, setting, value):
 
     thresh = {}
     if setting == 'c':
-        thresh = dict((k, float(value)) for (k, v) in x_control_train.items())
+        thresh = dict((k, float(value)) for (k, v) in list(x_control_train.items()))
         # print("Covariance threshold: %s" % thresh)
 
     # print("Will train classifier on %s %s-d points" % x_train.shape, file=sys.stderr)

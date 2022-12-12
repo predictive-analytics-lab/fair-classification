@@ -36,7 +36,7 @@ def generate_synthetic_data(plot_data=False):
     y = np.hstack((y1, y2))
 
     # shuffle the data
-    perm = range(0,n_samples*2)
+    perm = list(range(0,n_samples*2))
     shuffle(perm)
     X = X[perm]
     y = y[perm]
