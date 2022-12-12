@@ -1,28 +1,29 @@
 [tool.poetry]
 name = "fair-classification"
 version = "0.1.0"
-description = "Zafar et al.'s fairness method"
+description = "Fairness method by Zafar et al."
 authors = ["Zafar et al."]
 license = "GPL v3"
+readme = "README.md"
+packages = [{include = "fair_classification"}]
 
 [tool.poetry.dependencies]
-python = "^2.7.16"
-CVXcanon = "0.1.1"
-cvxpy = "0.4.11"
-dccp = "0.1.6"
-dill = "0.3.0"
-ecos = "2.0.7.post1"
-fastcache = "1.1.0"
-multiprocess = "0.70.8"
-numpy = "1.16.4"
-scikit-learn = "0.19.1"
-scipy = "1.2.2"
-scs = "2.1.1.post2"
-six = "1.12.0"
-toolz = "0.10.0"
+python = ">=3.8,<3.11"
+CVXcanon = "^0.1.2"
+cvxpy = "^1.2.2"
+dill = "^0.3.6"
+scikit-learn = "^1.2.0"
+scipy = "^1.9.3"
+setuptools = "58"
+pip = "19.3.1"
+dccp = "1.0.3"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+isort = "^5.10.1"
+mypy = "^0.991"
+ruff = "^0.0.177"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

@@ -2,15 +2,13 @@ import numpy as np
 from random import seed, shuffle
 import loss_funcs as lf  # our implementation of loss funcs
 from scipy.optimize import minimize  # for loss func minimization
-from multiprocessing import Pool, Process, Queue
+from multiprocessing import Process, Queue
 from collections import defaultdict
 from copy import deepcopy
-import sys
 
 SEED = 1122334455
-seed(
-    SEED
-)  # set the random seed so that the random permutations can be reproduced again
+# set the random seed so that the random permutations can be reproduced again
+seed(SEED)
 np.random.seed(SEED)
 
 
@@ -251,8 +249,8 @@ def compute_cross_validation_error(
         (
             train_score,
             test_score,
-            correct_answers_train,
-            correct_answers_test,
+            _,
+            _,
         ) = check_accuracy(w, x_train, y_train, x_test, y_test, None, None)
 
         distances_boundary_test = (np.dot(x_test, w)).tolist()
