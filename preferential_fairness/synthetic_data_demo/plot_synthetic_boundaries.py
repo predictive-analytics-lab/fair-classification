@@ -1,6 +1,5 @@
 import matplotlib
 import matplotlib.pyplot as plt  # for plotting stuff
-import os
 import numpy as np
 
 matplotlib.rcParams["text.usetex"] = True  # for type-1 fonts

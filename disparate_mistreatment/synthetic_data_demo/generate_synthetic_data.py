@@ -1,10 +1,8 @@
-import os, sys
-import math
+import sys
 import numpy as np
 import matplotlib.pyplot as plt  # for plotting stuff
 from random import seed, shuffle
 from scipy.stats import multivariate_normal  # generating synthetic data
-from sklearn.linear_model import LogisticRegression
 
 SEED = 1122334455
 seed(

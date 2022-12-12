@@ -1,9 +1,8 @@
-import os, sys
+import sys
 import numpy as np
 
-sys.path.insert(
-    0, "../../fair_classification/"
-)  # the code for fair classification is in this directory
+# the code for fair classification is in this directory
+sys.path.insert(0, "../../fair_classification/")
 import utils as ut
 import loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
 import json
@@ -114,8 +113,10 @@ def main(train_file, test_file, output_file, setting, value):
 ##############################################################################
 # we prefer simple IO to efficient IO, so everything goes in json
 
-# from prepare_adult_data import *
+
 def write_adult_data_to_disk():
+    from prepare_adult_data import load_adult_data
+
     (
         X,
         y,

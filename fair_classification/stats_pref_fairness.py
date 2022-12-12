@@ -2,9 +2,6 @@ import numpy as np
 from sklearn.preprocessing import (
     MaxAbsScaler,
 )  # normalize data with 0 and 1 as min/max absolute vals
-import scipy
-from multiprocessing import Pool, Process, Queue
-from sklearn.metrics import roc_auc_score
 import traceback
 
 
@@ -105,7 +102,7 @@ def get_acc_stats(dist_dict, y, x_sensitive, verbose=False):
     except:
         raise Exception("Sensitive feature can only take values 0 and 1... Exiting...")
 
-    if verbose == True:
+    if verbose is True:
         print("||  s  ||   frac_pos  ||")
 
     for s_val in set(x_sensitive):
@@ -129,7 +126,7 @@ def get_acc_stats(dist_dict, y, x_sensitive, verbose=False):
         acc_stats[s_val][s_val] = get_fp_fn_tp_tn(y_true_local, y_pred_local)
         acc_stats[s_val][other_val] = get_fp_fn_tp_tn(y_true_local, y_pred_local_other)
 
-        if verbose == True:
+        if verbose is True:
             if isinstance(
                 s_val, float
             ):  # print the int value of the sensitive attr val

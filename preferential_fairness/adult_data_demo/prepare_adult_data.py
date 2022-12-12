@@ -1,9 +1,8 @@
-import os, sys
+import os
 import urllib.request, urllib.error, urllib.parse
 import numpy as np
 from random import seed, shuffle
 from sklearn import preprocessing
-import pickle
 
 SEED = 1122
 seed(

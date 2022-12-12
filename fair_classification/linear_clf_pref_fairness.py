@@ -23,13 +23,13 @@ class LinearClf:
 
         """ Setting default lam val and Making sure that lam is provided for each group """
         if lam is None:
-            if train_multiple == False:
+            if train_multiple is False:
                 lam = 0.0
             else:
                 lam = {0: 0.0, 1: 0.0}
 
         else:
-            if train_multiple == True:
+            if train_multiple is True:
                 assert isinstance(lam, dict)
 
         self.loss_function = loss_function
@@ -72,7 +72,7 @@ class LinearClf:
         constraints = []
 
         np.random.seed(1234)  # set the seed before initializing the values of w
-        if self.train_multiple == True:
+        if self.train_multiple is True:
             w = {}
             for k in set(x_sensitive):
                 w[k] = Variable(X.shape[1])  # this is the weight vector
@@ -89,7 +89,7 @@ class LinearClf:
 
         num_all = X.shape[0]  # set of all data points
 
-        if self.train_multiple == True:
+        if self.train_multiple is True:
 
             obj = 0
             for k in set(x_sensitive):
@@ -195,7 +195,7 @@ class LinearClf:
             # check that the fairness constraint is satisfied
             for f_c in constraints:
                 try:
-                    assert f_c.value == True
+                    assert f_c.value is True
                 except:
                     print("Assertion failed. Fairness constraints not satisfied.")
                     print(traceback.print_exc())
@@ -213,7 +213,7 @@ class LinearClf:
             Storing the results 
         """
 
-        if self.train_multiple == True:
+        if self.train_multiple is True:
             self.w = {}
             for k in set(x_sensitive):
                 self.w[k] = np.array(
@@ -301,7 +301,7 @@ class LinearClf:
         Parity impact constraint
         """
 
-        assert self.train_multiple == False  # di cons is just for a single boundary clf
+        assert self.train_multiple is False  # di cons is just for a single boundary clf
         assert cov_thresh >= 0  # covariance thresh has to be a small positive number
 
         constraints = []

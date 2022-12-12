@@ -3,7 +3,6 @@ import os, sys
 import numpy as np
 import pandas as pd
 from collections import defaultdict
-from sklearn import feature_extraction
 from sklearn import preprocessing
 from random import seed, shuffle
 

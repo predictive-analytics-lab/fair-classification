@@ -1,5 +1,4 @@
-import os, sys
-import numpy as np
+import sys
 from prepare_adult_data import load_adult_data
 from sklearn.model_selection import train_test_split
 

@@ -88,10 +88,10 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
     if cons_params is not None:
         if cons_params.get("take_initial_sol") is None:  # true by default
             take_initial_sol = True
-        elif cons_params["take_initial_sol"] == False:
+        elif cons_params["take_initial_sol"] is False:
             take_initial_sol = False
 
-        if take_initial_sol == True:  # get the initial solution
+        if take_initial_sol is True:  # get the initial solution
             p = Problem(Minimize(loss), [])
             p.solve()
 
@@ -141,7 +141,7 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
     # check that the fairness constraint is satisfied
     for f_c in constraints:
         assert (
-            f_c.value == True
+            f_c.value is True
         )  # can comment this out if the solver fails too often, but make sure that the constraints are satisfied empirically. alternatively, consider increasing tau parameter
         pass
 
@@ -372,7 +372,7 @@ def get_fpr_fnr_sensitive_features(
     for s in sensitive_attrs:
         s_attr_to_fp_fn[s] = {}
         s_attr_vals = x_control_internal[s]
-        if verbose == True:
+        if verbose is True:
             print("||  s  || FPR. || FNR. ||")
         for s_val in sorted(list(set(s_attr_vals))):
             s_attr_to_fp_fn[s][s_val] = {}
@@ -408,7 +408,7 @@ def get_fpr_fnr_sensitive_features(
             s_attr_to_fp_fn[s][s_val]["fnr"] = fnr
 
             s_attr_to_fp_fn[s][s_val]["acc"] = (tp + tn) / (tp + tn + fp + fn)
-            if verbose == True:
+            if verbose is True:
                 if isinstance(
                     s_val, float
                 ):  # print the int value of the sensitive attr val
@@ -491,7 +491,7 @@ def get_sensitive_attr_constraint_fpr_fnr_cov(
     for cons_type in [0, 1, 2]:
         cov_type_name = cons_type_to_name[cons_type]
         cov = cons_sum_dict[cons_type][1] - cons_sum_dict[cons_type][0]
-        if verbose == True:
+        if verbose is True:
             print("Covariance for type '{}' is: {:0.7f}".format(cov_type_name, cov))
 
     return cons_sum_dict
@@ -594,7 +594,7 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
     ax.set_xlim([min(cov_range), max(cov_range)])
     plt.xlabel("Multiplicative loss factor")
     plt.ylabel("Perc. in positive class")
-    if apply_accuracy_constraint == False:
+    if apply_accuracy_constraint is False:
         plt.gca().invert_xaxis()
         plt.xlabel("Multiplicative covariance factor (c)")
     ax.legend()

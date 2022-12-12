@@ -6,7 +6,6 @@ sys.path.insert(
     0, "../../fair_classification/"
 )  # the code for fair classification is in this directory
 import utils as ut
-import loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
 import funcs_disp_mist as fdm
 
 
