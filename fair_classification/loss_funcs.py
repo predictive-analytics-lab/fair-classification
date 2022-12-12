@@ -1,10 +1,5 @@
 import sys
-import os
 import numpy as np
-import scipy.special
-from collections import defaultdict
-import traceback
-from copy import deepcopy
 
 
 def _hinge_loss(w, X, y):

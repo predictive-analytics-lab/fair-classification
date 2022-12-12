@@ -24,7 +24,7 @@ def load_json(filename):
     f = json.load(open(filename))
     x = np.array(f["x"])
     y = np.array(f["class"])
-    sensitive = dict((k, np.array(v)) for (k, v) in list(f["sensitive"].items()))
+    sensitive = {k: np.array(v) for (k, v) in list(f["sensitive"].items())}
     return x, y, sensitive
 
 

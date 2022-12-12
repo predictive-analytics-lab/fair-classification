@@ -32,7 +32,7 @@ def main(train_file, model_path, setting, value):
 
     thresh = {}
     if setting == "c":
-        thresh = dict((k, float(value)) for (k, v) in list(x_control_train.items()))
+        thresh = {k: float(value) for (k, v) in list(x_control_train.items())}
         # print("Covariance threshold: %s" % thresh)
 
     # print("Will train classifier on %s %s-d points" % x_train.shape, file=sys.stderr)

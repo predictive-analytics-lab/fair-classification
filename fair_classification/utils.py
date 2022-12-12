@@ -1,6 +1,5 @@
 import numpy as np
 from random import seed, shuffle
-import loss_funcs as lf  # our implementation of loss funcs
 from scipy.optimize import minimize  # for loss func minimization
 from multiprocessing import Process, Queue
 from collections import defaultdict

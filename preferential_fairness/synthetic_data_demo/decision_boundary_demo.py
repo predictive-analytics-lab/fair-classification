@@ -24,16 +24,16 @@ def print_stats_and_plots(x, y, x_sensitive, clf, fname):
         w_arr = [clf.w[0], clf.w[1]]
         lt_arr = ["c--", "b--"]
         label_arr = [
-            "$\mathcal{B}_0: %0.2f; \mathcal{B}_1: %0.2f$"
+            r"$\mathcal{B}_0: %0.2f; \mathcal{B}_1: %0.2f$"
             % (acc_stats[0][0]["frac_pos"], acc_stats[1][0]["frac_pos"]),
-            "$\mathcal{B}_0: %0.2f; \mathcal{B}_1: %0.2f$"
+            r"$\mathcal{B}_0: %0.2f; \mathcal{B}_1: %0.2f$"
             % (acc_stats[0][1]["frac_pos"], acc_stats[1][1]["frac_pos"]),
         ]
     else:
         w_arr = [clf.w]
         lt_arr = ["k--"]
         label_arr = [
-            "$\mathcal{B}_0: %0.2f; \mathcal{B}_1: %0.2f$"
+            r"$\mathcal{B}_0: %0.2f; \mathcal{B}_1: %0.2f$"
             % (acc_stats[0][0]["frac_pos"], acc_stats[1][1]["frac_pos"]),
         ]
 

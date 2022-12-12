@@ -70,7 +70,7 @@ def plot_boundaries(X, y, x_control, w_arr, acc_arr, fp_fn_arr, fname):
         x1, x2 = max(x_draw[:, 1]) - 2, min(x_draw[:, 1])
         y1, y2 = get_line_coordinates(w_arr[i], x1, x2)
 
-        l = "Acc=%0.2f; FPR=%0.2f:%0.2f; FNR=%0.2f:%0.2f" % (
+        l = "Acc={:0.2f}; FPR={:0.2f}:{:0.2f}; FNR={:0.2f}:{:0.2f}".format(
             acc_arr[i],
             fp_fn_arr[i][0.0]["fpr"],
             fp_fn_arr[i][1.0]["fpr"],

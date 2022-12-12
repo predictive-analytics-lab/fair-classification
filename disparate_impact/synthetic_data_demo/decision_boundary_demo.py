@@ -121,7 +121,7 @@ def test_synthetic_data():
             [y1, y2],
             "c-",
             linewidth=3,
-            label="Acc=%0.2f; p%% rule=%0.0f%% - Original" % (acc1, p1),
+            label="Acc={:0.2f}; p% rule={:0.0f}% - Original".format(acc1, p1),
         )
         y1, y2 = ut.get_line_coordinates(w2, x1, x2)
         plt.plot(
@@ -129,7 +129,7 @@ def test_synthetic_data():
             [y1, y2],
             "b--",
             linewidth=3,
-            label="Acc=%0.2f; p%% rule=%0.0f%% - Constrained" % (acc2, p2),
+            label="Acc={:0.2f}; p% rule={:0.0f}% - Constrained".format(acc2, p2),
         )
 
         plt.tick_params(

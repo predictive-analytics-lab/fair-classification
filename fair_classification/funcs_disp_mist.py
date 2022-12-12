@@ -422,7 +422,7 @@ def get_fpr_fnr_sensitive_features(
                     s_val, float
                 ):  # print the int value of the sensitive attr val
                     s_val = int(s_val)
-                print("||  %s  || %0.2f || %0.2f ||" % (s_val, fpr, fnr))
+                print("||  {}  || {:0.2f} || {:0.2f} ||".format(s_val, fpr, fnr))
 
         return s_attr_to_fp_fn
 
@@ -501,7 +501,7 @@ def get_sensitive_attr_constraint_fpr_fnr_cov(
         cov_type_name = cons_type_to_name[cons_type]
         cov = cons_sum_dict[cons_type][1] - cons_sum_dict[cons_type][0]
         if verbose == True:
-            print("Covariance for type '%s' is: %0.7f" % (cov_type_name, cov))
+            print("Covariance for type '{}' is: {:0.7f}".format(cov_type_name, cov))
 
     return cons_sum_dict
 
