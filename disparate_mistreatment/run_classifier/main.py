@@ -1,19 +1,18 @@
 import sys
 import json
 import numpy as np
-sys.path.insert(0, '../../fair_classification/') # the code for fair classification is in this directory
+
+sys.path.insert(
+    0, "../../fair_classification/"
+)  # the code for fair classification is in this directory
 import utils as ut
-import loss_funcs as lf # loss funcs that can be optimized subject to various constraints
+import loss_funcs as lf  # loss funcs that can be optimized subject to various constraints
 import funcs_disp_mist as fdm
 
 
 def train_classifier(x, y, control, cons_params, eps):
     loss_function = "logreg"  # only logistic regression is implemented
-    w = fdm.train_model_disp_mist(
-        x, y, control, loss_function,
-        eps,
-        cons_params
-        )
+    w = fdm.train_model_disp_mist(x, y, control, loss_function, eps, cons_params)
     return w
 
 
@@ -60,21 +59,25 @@ def main(train_file, test_file, output_file, mode, tau="5.0", mu="1.2", eps="0.0
     sensitive_attrs = list(x_control_train.keys())
     sensitive_attr = str(sensitive_attrs[0])
 
-    sensitive_attrs_to_cov_thresh = {sensitive_attr: {0: {0: 0, 1: 0}, 1: {0: 0, 1: 0}, 2: {0: 0, 1: 0}}}
-    cons_params = {"tau": float(tau),
-                   "mu": float(mu),
-                   "sensitive_attrs_to_cov_thresh": sensitive_attrs_to_cov_thresh}
+    sensitive_attrs_to_cov_thresh = {
+        sensitive_attr: {0: {0: 0, 1: 0}, 1: {0: 0, 1: 0}, 2: {0: 0, 1: 0}}
+    }
+    cons_params = {
+        "tau": float(tau),
+        "mu": float(mu),
+        "sensitive_attrs_to_cov_thresh": sensitive_attrs_to_cov_thresh,
+    }
 
-    if mode == 'fpr':
+    if mode == "fpr":
         cons_type = 1
         cons_params["cons_type"] = cons_type
-    elif mode == 'fnr':
+    elif mode == "fnr":
         cons_type = 2
         cons_params["cons_type"] = cons_type
-    elif mode == 'fprfnr':
+    elif mode == "fprfnr":
         cons_type = 4
         cons_params["cons_type"] = cons_type
-    elif mode == 'baseline':
+    elif mode == "baseline":
         cons_params = None
     else:
         raise Exception("Don't know how to handle setting %s" % mode)
@@ -92,6 +95,6 @@ def main(train_file, test_file, output_file, mode, tau="5.0", mu="1.2", eps="0.0
     output_file.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(*sys.argv[1:])
     exit(0)

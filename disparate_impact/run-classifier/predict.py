@@ -4,7 +4,10 @@ import json
 import numpy as np
 
 from main import load_json, predict
-sys.path.insert(0, '../../fair_classification/') # the code for fair classification is in this directory
+
+sys.path.insert(
+    0, "../../fair_classification/"
+)  # the code for fair classification is in this directory
 import utils as ut
 
 
@@ -22,6 +25,6 @@ def main(test_file, model_path, output_file):
     output_file.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(*sys.argv[1:])
     exit(0)

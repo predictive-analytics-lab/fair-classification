@@ -3,7 +3,10 @@ import sys
 import numpy as np
 
 from main import load_json, train_classifier
-sys.path.insert(0, '../../fair_classification/') # the code for fair classification is in this directory
+
+sys.path.insert(
+    0, "../../fair_classification/"
+)  # the code for fair classification is in this directory
 import utils as ut
 
 
@@ -36,21 +39,25 @@ def main(train_file, model_path, mode, tau="5.0", mu="1.2", eps="0.0001"):
     sensitive_attrs = list(x_control_train.keys())
     sensitive_attr = str(sensitive_attrs[0])
 
-    sensitive_attrs_to_cov_thresh = {sensitive_attr: {0: {0: 0, 1: 0}, 1: {0: 0, 1: 0}, 2: {0: 0, 1: 0}}}
-    cons_params = {"tau": float(tau),
-                   "mu": float(mu),
-                   "sensitive_attrs_to_cov_thresh": sensitive_attrs_to_cov_thresh}
+    sensitive_attrs_to_cov_thresh = {
+        sensitive_attr: {0: {0: 0, 1: 0}, 1: {0: 0, 1: 0}, 2: {0: 0, 1: 0}}
+    }
+    cons_params = {
+        "tau": float(tau),
+        "mu": float(mu),
+        "sensitive_attrs_to_cov_thresh": sensitive_attrs_to_cov_thresh,
+    }
 
-    if mode == 'fpr':
+    if mode == "fpr":
         cons_type = 1
         cons_params["cons_type"] = cons_type
-    elif mode == 'fnr':
+    elif mode == "fnr":
         cons_type = 2
         cons_params["cons_type"] = cons_type
-    elif mode == 'fprfnr':
+    elif mode == "fprfnr":
         cons_type = 4
         cons_params["cons_type"] = cons_type
-    elif mode == 'baseline':
+    elif mode == "baseline":
         cons_params = None
     else:
         raise Exception("Don't know how to handle setting %s" % mode)
@@ -64,6 +71,6 @@ def main(train_file, model_path, mode, tau="5.0", mu="1.2", eps="0.0001"):
     np.save(model_path, w)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(*sys.argv[1:])
     exit(0)
