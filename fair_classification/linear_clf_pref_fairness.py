@@ -1,13 +1,11 @@
-import os, sys
+import sys
 import numpy as np
 import traceback
 
-sys.path.insert(
-    0, "/home/mzafar/libraries/dccp"
-)  # we will store the latest version of DCCP here.
-from cvxpy import *
-import dccp
-from dccp.problem import is_dccp
+from cvxpy import sum, multiply, maximum, sum_squares, logistic
+from cvxpy.expressions.variable import Variable
+from cvxpy.problems.problem import Problem
+from cvxpy.problems.objective import Minimize
 
 
 class LinearClf:
@@ -104,14 +102,11 @@ class LinearClf:
 
                 if self.loss_function == "logreg":
                     obj += (
-                        sum_entries(logistic(mul_elemwise(-y_k, X_k * w[k]))) / num_all
+                        sum(logistic(multiply(-y_k, X_k * w[k]))) / num_all
                     )  # notice that we are dividing by the length of the whole dataset, and not just of this sensitive group. this way, the group that has more people contributes more to the loss
 
                 elif self.loss_function == "svm_linear":
-                    obj += (
-                        sum_entries(max_elemwise(0, 1 - mul_elemwise(y_k, X_k * w[k])))
-                        / num_all
-                    )
+                    obj += sum(maximum(0, 1 - multiply(y_k, X_k * w[k]))) / num_all
 
                 else:
                     raise Exception("Invalid loss function")
@@ -123,11 +118,9 @@ class LinearClf:
                 sum_squares(w[1:]) * self.lam
             )  # regularizer -- first term in w is the intercept, so no need to regularize that
             if self.loss_function == "logreg":
-                obj += sum_entries(logistic(mul_elemwise(-y, X * w))) / num_all
+                obj += sum(logistic(multiply(-y, X * w))) / num_all
             elif self.loss_function == "svm_linear":
-                obj += (
-                    sum_entries(max_elemwise(0, 1 - mul_elemwise(y, X * w))) / num_all
-                )
+                obj += sum(maximum(0, 1 - multiply(y, X * w))) / num_all
             else:
                 raise Exception("Invalid loss function")
 
@@ -315,7 +308,7 @@ class LinearClf:
         z_i_z_bar = x_sensitive - np.mean(x_sensitive)
 
         fx = X * w
-        prod = sum_entries(mul_elemwise(z_i_z_bar, fx)) / X.shape[0]
+        prod = sum(multiply(z_i_z_bar, fx)) / X.shape[0]
 
         constraints.append(prod <= cov_thresh)
         constraints.append(prod >= -cov_thresh)
@@ -341,7 +334,7 @@ class LinearClf:
                 num_g = X_g.shape[0]
 
                 for k in list(w.keys()):  # get the distance with each group's w
-                    prod_dict[val][k] = sum_entries(max_elemwise(0, X_g * w[k])) / num_g
+                    prod_dict[val][k] = sum(maximum(0, X_g * w[k])) / num_g
 
         else:
             raise Exception("Invalid constraint type")

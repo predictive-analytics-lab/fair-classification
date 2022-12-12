@@ -1,18 +1,18 @@
-import os, sys
+import sys
 import traceback
 import numpy as np
-from random import seed, shuffle
-from collections import defaultdict
+from random import seed
 from copy import deepcopy
-from cvxpy import *
-import dccp
-from dccp.problem import is_dccp
+from cvxpy import sum, multiply, logistic, minimum
+from cvxpy.expressions.variable import Variable
+from cvxpy.problems.problem import Problem
+from cvxpy.problems.objective import Minimize
 import utils as ut
+import matplotlib.pyplot as plt
 
 SEED = 1122334455
-seed(
-    SEED
-)  # set the random seed so that the random permutations can be reproduced again
+# set the random seed so that the random permutations can be reproduced again
+seed(SEED)
 np.random.seed(SEED)
 
 
@@ -79,7 +79,7 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
     if loss_function == "logreg":
         # constructing the logistic loss problem
         loss = (
-            sum_entries(logistic(mul_elemwise(-y, x * w))) / num_points
+            sum(logistic(multiply(-y, x * w))) / num_points
         )  # we are converting y to a diagonal matrix for consistent
 
     # sometimes, its a good idea to give a starting point to the constrained solver
@@ -176,12 +176,7 @@ def get_clf_stats(
     all_class_labels_assigned_train = np.sign(distances_boundary_train)
     all_class_labels_assigned_test = np.sign(distances_boundary_test)
 
-    (
-        train_score,
-        test_score,
-        correct_answers_train,
-        correct_answers_test,
-    ) = ut.check_accuracy(
+    (train_score, test_score, _, _) = ut.check_accuracy(
         None,
         x_train,
         y_train,
@@ -314,22 +309,18 @@ def get_constraint_list_cov(
 
                 #################################################################
                 # #DCCP constraints
-                dist_bound_prod = mul_elemwise(y_train[idx], x_train[idx] * w)  # y.f(x)
+                dist_bound_prod = multiply(y_train[idx], x_train[idx] * w)  # y.f(x)
 
-                cons_sum_dict[0][v] = sum_entries(min_elemwise(0, dist_bound_prod)) * (
+                cons_sum_dict[0][v] = sum(minimum(0, dist_bound_prod)) * (
                     s_val_to_avg[0][v] / len(x_train)
                 )  # avg misclassification distance from boundary
-                cons_sum_dict[1][v] = sum_entries(
-                    min_elemwise(
-                        0, mul_elemwise((1 - y_train[idx]) / 2.0, dist_bound_prod)
-                    )
+                cons_sum_dict[1][v] = sum(
+                    minimum(0, multiply((1 - y_train[idx]) / 2.0, dist_bound_prod))
                 ) * (
                     s_val_to_avg[1][v] / sum(y_train == -1)
                 )  # avg false positive distance from boundary (only operates on the ground truth neg dataset)
-                cons_sum_dict[2][v] = sum_entries(
-                    min_elemwise(
-                        0, mul_elemwise((1 + y_train[idx]) / 2.0, dist_bound_prod)
-                    )
+                cons_sum_dict[2][v] = sum(
+                    minimum(0, multiply((1 + y_train[idx]) / 2.0, dist_bound_prod))
                 ) * (
                     s_val_to_avg[2][v] / sum(y_train == +1)
                 )  # avg false negative distance from boundary

@@ -1,8 +1,6 @@
-import os, sys
-import numpy as np
-from generate_synthetic_data import *
+import sys
+from generate_synthetic_data import generate_synthetic_data
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt  # for plotting stuff
 
 sys.path.insert(
     0, "../../fair_classification/"

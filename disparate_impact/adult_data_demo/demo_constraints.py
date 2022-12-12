@@ -1,6 +1,6 @@
-import os, sys
+import sys
 import numpy as np
-from prepare_adult_data import *
+from prepare_adult_data import load_adult_data
 
 sys.path.insert(
     0, "../../fair_classification/"
@@ -51,12 +51,9 @@ def test_adult_data():
             sensitive_attrs_to_cov_thresh,
             gamma,
         )
-        (
-            train_score,
-            test_score,
-            correct_answers_train,
-            correct_answers_test,
-        ) = ut.check_accuracy(w, x_train, y_train, x_test, y_test, None, None)
+        (_, test_score, _, _) = ut.check_accuracy(
+            w, x_train, y_train, x_test, y_test, None, None
+        )
         distances_boundary_test = (np.dot(x_test, w)).tolist()
         all_class_labels_assigned_test = np.sign(distances_boundary_test)
         correlation_dict_test = ut.get_correlations(

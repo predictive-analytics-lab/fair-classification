@@ -1,10 +1,8 @@
-import os, sys
-import numpy as np
-from generate_synthetic_data import *
+import sys
+from generate_synthetic_data import generate_synthetic_data
 
-sys.path.insert(
-    0, "../../fair_classification/"
-)  # the code for fair classification is in this directory
+# the code for fair classification is in this directory
+sys.path.insert(0, "../../fair_classification/")
 import utils as ut
 import funcs_disp_mist as fdm
 import plot_syn_boundaries as psb
@@ -39,14 +37,7 @@ def test_synthetic_data():
             x_train, y_train, x_control_train, loss_function, EPS, cons_params
         )
 
-        (
-            train_score,
-            test_score,
-            cov_all_train,
-            cov_all_test,
-            s_attr_to_fp_fn_train,
-            s_attr_to_fp_fn_test,
-        ) = fdm.get_clf_stats(
+        (_, test_score, _, _, _, s_attr_to_fp_fn_test) = fdm.get_clf_stats(
             w,
             x_train,
             y_train,

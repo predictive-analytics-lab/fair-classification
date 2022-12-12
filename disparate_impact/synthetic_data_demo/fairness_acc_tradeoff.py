@@ -1,6 +1,5 @@
-import os, sys
-import numpy as np
-from generate_synthetic_data import *
+import sys
+from generate_synthetic_data import generate_synthetic_data
 
 sys.path.insert(
     0, "../../fair_classification/"
@@ -28,11 +27,11 @@ def test_synthetic_data():
     X = ut.add_intercept(X)  # add intercept to X before applying the linear classifier
     (
         test_acc_arr,
-        train_acc_arr,
+        _,
         correlation_dict_test_arr,
-        correlation_dict_train_arr,
+        _,
         cov_dict_test_arr,
-        cov_dict_train_arr,
+        _,
     ) = ut.compute_cross_validation_error(
         X,
         y,
@@ -56,11 +55,11 @@ def test_synthetic_data():
     cov_factor = 0
     (
         test_acc_arr,
-        train_acc_arr,
+        _,
         correlation_dict_test_arr,
-        correlation_dict_train_arr,
+        _,
         cov_dict_test_arr,
-        cov_dict_train_arr,
+        _,
     ) = ut.compute_cross_validation_error(
         X,
         y,

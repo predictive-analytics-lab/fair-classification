@@ -1,6 +1,5 @@
-import os, sys
-import numpy as np
-from load_compas_data import *
+import sys
+from load_compas_data import load_compas_data
 
 sys.path.insert(
     0, "../../fair_classification/"
@@ -36,14 +35,7 @@ def test_compas_data():
             x_train, y_train, x_control_train, loss_function, EPS, cons_params
         )
 
-        (
-            train_score,
-            test_score,
-            cov_all_train,
-            cov_all_test,
-            s_attr_to_fp_fn_train,
-            s_attr_to_fp_fn_test,
-        ) = fdm.get_clf_stats(
+        (_, test_score, _, _, _, s_attr_to_fp_fn_test) = fdm.get_clf_stats(
             w,
             x_train,
             y_train,
