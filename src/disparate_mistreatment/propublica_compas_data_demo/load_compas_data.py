@@ -62,7 +62,7 @@ def load_compas_data():
 
     # convert to np array
     data = df.to_dict("list")
-    for k in data.keys():
+    for k in data:
         data[k] = np.array(data[k])
 
     """ Filtering the data """
@@ -91,7 +91,7 @@ def load_compas_data():
     )
 
     # select the examples that satisfy this criteria
-    for k in data.keys():
+    for k in data:
         data[k] = data[k][idx]
 
     """ Feature normalization and one hot encoding """
@@ -146,7 +146,7 @@ def load_compas_data():
 
     # convert the sensitive feature to 1-d array
     x_control = dict(x_control)
-    for k in x_control.keys():
+    for k in x_control:
         assert (
             x_control[k].shape[1] == 1
         )  # make sure that the sensitive feature is binary after one hot encoding
@@ -159,7 +159,7 @@ def load_compas_data():
     shuffle(perm)
     X = X[perm]
     y = y[perm]
-    for k in x_control.keys():
+    for k in x_control:
         x_control[k] = x_control[k][perm]
 
     X = ut.add_intercept(X)

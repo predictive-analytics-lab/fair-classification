@@ -83,8 +83,8 @@ def test_synthetic_data():
 
     for m in mult_range:
         sensitive_attrs_to_cov_thresh = deepcopy(cov_all_train_uncons)
-        for s_attr in sensitive_attrs_to_cov_thresh.keys():
-            for cov_type in sensitive_attrs_to_cov_thresh[s_attr].keys():
+        for s_attr in sensitive_attrs_to_cov_thresh:
+            for cov_type in sensitive_attrs_to_cov_thresh[s_attr]:
                 for s_val in sensitive_attrs_to_cov_thresh[s_attr][cov_type]:
                     sensitive_attrs_to_cov_thresh[s_attr][cov_type][s_val] *= m
 

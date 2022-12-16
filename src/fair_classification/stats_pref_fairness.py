@@ -169,8 +169,8 @@ def get_sensitive_attr_cov(dist_dict):
         1: {},
     }  # s_attr_group (0/1) -> w_group (0/1) -> ramp approx
 
-    for s_val in dist_dict.keys():
-        for w_group in dist_dict[s_val].keys():
+    for s_val in dist_dict:
+        for w_group in dist_dict[s_val]:
             fx = dist_dict[s_val][w_group]
             s_val_to_cons_sum[s_val][w_group] = np.sum(np.maximum(0, fx)) / fx.shape[0]
 

@@ -288,7 +288,7 @@ class LinearClf:
                     X_g, attr
                 )  # each group gets decision with their own boundary
 
-                for k in self.w.keys():
+                for k in self.w:
                     distances_boundary_dict[attr][k] = self.decision_function(
                         X_g, k
                     )  # each group gets a decision with both boundaries
@@ -333,7 +333,7 @@ class LinearClf:
                 X_g = X[idx]
                 num_g = X_g.shape[0]
 
-                for k in w.keys():  # get the distance with each group's w
+                for k in w:  # get the distance with each group's w
                     prod_dict[val][k] = sum(maximum(0, X_g * w[k])) / num_g
 
         else:

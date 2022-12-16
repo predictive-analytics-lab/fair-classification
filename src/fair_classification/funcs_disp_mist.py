@@ -244,7 +244,7 @@ def get_distance_boundary(w, x, s_attr_arr):
 
     distances_boundary = np.zeros(x.shape[0])
     if isinstance(w, dict):  # if we have separate weight vectors per group
-        for k in w.keys():  # for each w corresponding to each sensitive group
+        for k in w:  # for each w corresponding to each sensitive group
             d = np.dot(x, w[k])
             distances_boundary[s_attr_arr == k] = d[
                 s_attr_arr == k
@@ -272,7 +272,7 @@ def get_constraint_list_cov(
     """
 
     constraints = []
-    for attr in sensitive_attrs_to_cov_thresh.keys():
+    for attr in sensitive_attrs_to_cov_thresh:
 
         attr_arr = x_control_train[attr]
         attr_arr_transformed, index_dict = ut.get_one_hot_encoding(attr_arr)
@@ -534,10 +534,10 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
         sensitive_attrs_to_cov_original_arr_multiplied = []
         for sensitive_attrs_to_cov_original in cov_dict_train_arr:
             sensitive_attrs_to_cov_thresh = deepcopy(sensitive_attrs_to_cov_original)
-            for k in sensitive_attrs_to_cov_thresh.keys():
+            for k in sensitive_attrs_to_cov_thresh:
                 v = sensitive_attrs_to_cov_thresh[k]
                 if isinstance(v, dict):
-                    for k1 in v.keys():
+                    for k1 in v:
                         v[k1] = v[k1] * c
                 else:
                     sensitive_attrs_to_cov_thresh[k] = v * c

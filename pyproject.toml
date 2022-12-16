@@ -26,6 +26,7 @@ mypy = "^0.991"
 ruff = "^0.0.177"
 
 [tool.ruff]
+extend-select = ["SIM"]
 ignore = ["E501"]
 
 [tool.pyright]

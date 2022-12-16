@@ -210,7 +210,7 @@ def compute_cross_validation_error(
         x_all_perm = x_all[perm]
         y_all_perm = y_all[perm]
         x_control_all_perm = {}
-        for k in x_control_all.keys():
+        for k in x_control_all:
             x_control_all_perm[k] = np.array(x_control_all[k])[perm]
 
         (
@@ -683,7 +683,7 @@ def split_into_train_test(x_all, y_all, x_control_all, train_fold_size):
     y_all_test = y_all[split_point:]
     x_control_all_train = {}
     x_control_all_test = {}
-    for k in x_control_all.keys():
+    for k in x_control_all:
         x_control_all_train[k] = x_control_all[k][:split_point]
         x_control_all_test[k] = x_control_all[k][split_point:]
 
@@ -783,10 +783,10 @@ def plot_cov_thresh_vs_acc_pos_ratio(
         sensitive_attrs_to_cov_original_arr_multiplied = []
         for sensitive_attrs_to_cov_original in cov_dict_train_arr:
             sensitive_attrs_to_cov_thresh = deepcopy(sensitive_attrs_to_cov_original)
-            for k in sensitive_attrs_to_cov_thresh.keys():
+            for k in sensitive_attrs_to_cov_thresh:
                 v = sensitive_attrs_to_cov_thresh[k]
                 if isinstance(v, dict):
-                    for k1 in v.keys():
+                    for k1 in v:
                         v[k1] = v[k1] * c
                 else:
                     sensitive_attrs_to_cov_thresh[k] = v * c

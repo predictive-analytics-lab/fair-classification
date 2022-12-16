@@ -184,7 +184,7 @@ def load_adult_data(load_data_size=None):
     shuffle(perm)
     X = X[perm]
     y = y[perm]
-    for k in x_control.keys():
+    for k in x_control:
         x_control[k] = x_control[k][perm]
 
     # see if we need to subsample the data
@@ -192,7 +192,7 @@ def load_adult_data(load_data_size=None):
         print("Loading only %d examples from the data" % load_data_size)
         X = X[:load_data_size]
         y = y[:load_data_size]
-        for k in x_control.keys():
+        for k in x_control:
             x_control[k] = x_control[k][:load_data_size]
 
     return X, y, x_control
