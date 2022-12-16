@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import utils as ut
 from cvxpy import logistic, minimum, multiply, sum
+from cvxpy.settings import ECOS
 from cvxpy.expressions.variable import Variable
 from cvxpy.problems.objective import Minimize
 from cvxpy.problems.problem import Problem
@@ -507,7 +508,8 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
     positive_class_label = 1  # positive class is +1
     test_acc = []
 
-    # first get the original values of covariance in the unconstrained classifier -- these original values are not needed for reverse constraint
+    # first get the original values of covariance in the unconstrained classifier -- these original
+    # values are not needed for reverse constraint
     (
         test_acc_arr,
         train_acc_arr,
@@ -525,7 +527,7 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
         apply_accuracy_constraint,
         sep_constraint,
         sensitive_attrs,
-        [{} for i in range(0, num_folds)],
+        [{} for _ in range(num_folds)],
         0,
     )
 
@@ -570,7 +572,8 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
         correlation_dict_train = get_avg_correlation_dict(correlation_dict_train_arr)
         correlation_dict_test = get_avg_correlation_dict(correlation_dict_test_arr)
 
-        # just plot the correlations for the first sensitive attr, the plotting can be extended for the other values, but as a proof of concept, we will jsut show for one
+        # just plot the correlations for the first sensitive attr, the plotting can be extended for
+        # the other values, but as a proof of concept, we will jsut show for one
         s = sensitive_attrs[0]
 
         for k, v in correlation_dict_test[s].items():
