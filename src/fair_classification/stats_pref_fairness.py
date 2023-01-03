@@ -56,23 +56,19 @@ def get_fp_fn_tp_tn(y_true, y_pred):
 
     acc = float(sum(y_true == y_pred)) / len(y_true)
 
-    fp = sum(
-        np.logical_and(y_true == -1.0, y_pred == +1.0)
-    )  # something which is -ve but is misclassified as +ve
-    fn = sum(
-        np.logical_and(y_true == +1.0, y_pred == -1.0)
-    )  # something which is +ve but is misclassified as -ve
-    tp = sum(
-        np.logical_and(y_true == +1.0, y_pred == +1.0)
-    )  # something which is +ve AND is correctly classified as +ve
-    tn = sum(
-        np.logical_and(y_true == -1.0, y_pred == -1.0)
-    )  # something which is -ve AND is correctly classified as -ve
+    # something which is -ve but is misclassified as +ve
+    fp = sum(np.logical_and(y_true == -1.0, y_pred == +1.0))
+    # something which is +ve but is misclassified as -ve
+    fn = sum(np.logical_and(y_true == +1.0, y_pred == -1.0))
+    # something which is +ve AND is correctly classified as +ve
+    tp = sum(np.logical_and(y_true == +1.0, y_pred == +1.0))
+    # something which is -ve AND is correctly classified as -ve
+    tn = sum(np.logical_and(y_true == -1.0, y_pred == -1.0))
 
     fpr = float(fp) / float(fp + tn)
     fnr = float(fn) / float(fn + tp)
-    tpr = float(tp) / float(tp + fn)
-    tnr = float(tn) / float(tn + fp)
+    # tpr = float(tp) / float(tp + fn)
+    # tnr = float(tn) / float(tn + fp)
     frac_pos = (tp + fp) / (tp + tn + fp + fn)  # fraction classified as positive
 
     out_dict = {"fpr": fpr, "fnr": fnr, "acc": acc, "frac_pos": frac_pos}
@@ -103,7 +99,7 @@ def get_acc_stats(dist_dict, y, x_sensitive, verbose=False):
     except:
         raise Exception("Sensitive feature can only take values 0 and 1... Exiting...")
 
-    if verbose is True:
+    if verbose:
         print("||  s  ||   frac_pos  ||")
 
     for s_val in set(x_sensitive):
@@ -127,7 +123,7 @@ def get_acc_stats(dist_dict, y, x_sensitive, verbose=False):
         acc_stats[s_val][s_val] = get_fp_fn_tp_tn(y_true_local, y_pred_local)
         acc_stats[s_val][other_val] = get_fp_fn_tp_tn(y_true_local, y_pred_local_other)
 
-        if verbose is True:
+        if verbose:
             if isinstance(
                 s_val, float
             ):  # print the int value of the sensitive attr val

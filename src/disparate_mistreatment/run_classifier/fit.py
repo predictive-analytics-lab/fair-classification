@@ -1,7 +1,7 @@
 import sys
 
 import numpy as np
-from main import load_json, train_classifier
+from .main import load_json, train_classifier
 
 import src.fair_classification.utils as ut
 

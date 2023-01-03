@@ -1,16 +1,24 @@
 import sys
 import traceback
+from typing import Optional, Union, Dict
 
 import numpy as np
-from cvxpy import logistic, maximum, multiply, sum, sum_squares
+from cvxpy import logistic, maximum, multiply, sum as sum_entries, sum_squares
 from cvxpy.expressions.variable import Variable
 from cvxpy.problems.objective import Minimize
 from cvxpy.problems.problem import Problem
+import dccp
+
+from src.types import ConsParams, LossFunction
 
 
 class LinearClf:
     def __init__(
-        self, loss_function, lam=None, train_multiple=False, random_state=1234
+        self,
+        loss_function: LossFunction,
+        lam: Union[None, float, Dict[int, float]] = None,
+        train_multiple: bool = False,
+        random_state: int = 1234,
     ):
 
         """
@@ -23,13 +31,13 @@ class LinearClf:
 
         """ Setting default lam val and Making sure that lam is provided for each group """
         if lam is None:
-            if train_multiple is False:
+            if not train_multiple:
                 lam = 0.0
             else:
                 lam = {0: 0.0, 1: 0.0}
 
         else:
-            if train_multiple is True:
+            if train_multiple:
                 assert isinstance(lam, dict)
 
         self.loss_function = loss_function
@@ -38,7 +46,7 @@ class LinearClf:
 
         np.random.seed(random_state)
 
-    def fit(self, X, y, x_sensitive, cons_params=None):
+    def fit(self, X, y, x_sensitive, cons_params: Optional[ConsParams] = None):
 
         """
         X: n x d array
@@ -72,13 +80,12 @@ class LinearClf:
         constraints = []
 
         np.random.seed(1234)  # set the seed before initializing the values of w
-        if self.train_multiple is True:
+        if self.train_multiple:
             w = {}
             for k in set(x_sensitive):
                 w[k] = Variable(X.shape[1])  # this is the weight vector
-                w[k].value = np.random.rand(
-                    X.shape[1]
-                )  # initialize the value of w -- uniform distribution over [0,1]
+                # initialize the value of w -- uniform distribution over [0,1]
+                w[k].value = np.random.rand(X.shape[1])
         else:
             w = Variable(X.shape[1])  # this is the weight vector
             w.value = np.random.rand(X.shape[1])
@@ -89,24 +96,26 @@ class LinearClf:
 
         num_all = X.shape[0]  # set of all data points
 
-        if self.train_multiple is True:
+        if self.train_multiple:
 
             obj = 0
             for k in set(x_sensitive):
                 idx = x_sensitive == k
                 X_k = X[idx]
                 y_k = y[idx]
-                obj += (
-                    sum_squares(w[k][1:]) * self.lam[k]
-                )  # first term in w is the intercept, so no need to regularize that
+                # first term in w is the intercept, so no need to regularize that
+                obj += sum_squares(w[k][1:]) * self.lam[k]
 
                 if self.loss_function == "logreg":
-                    obj += (
-                        sum(logistic(multiply(-y_k, X_k * w[k]))) / num_all
-                    )  # notice that we are dividing by the length of the whole dataset, and not just of this sensitive group. this way, the group that has more people contributes more to the loss
+                    # notice that we are dividing by the length of the whole dataset, and not just
+                    # of this sensitive group. this way, the group that has more people contributes
+                    # more to the loss
+                    obj += sum_entries(logistic(multiply(-y_k, X_k * w[k]))) / num_all
 
                 elif self.loss_function == "svm_linear":
-                    obj += sum(maximum(0, 1 - multiply(y_k, X_k * w[k]))) / num_all
+                    obj += (
+                        sum_entries(maximum(0, 1 - multiply(y_k, X_k * w[k]))) / num_all
+                    )
 
                 else:
                     raise Exception("Invalid loss function")
@@ -114,13 +123,12 @@ class LinearClf:
         else:
 
             obj = 0
-            obj += (
-                sum_squares(w[1:]) * self.lam
-            )  # regularizer -- first term in w is the intercept, so no need to regularize that
+            # regularizer -- first term in w is the intercept, so no need to regularize that
+            obj += sum_squares(w[1:]) * self.lam
             if self.loss_function == "logreg":
-                obj += sum(logistic(multiply(-y, X * w))) / num_all
+                obj += sum_entries(logistic(multiply(-y, X @ w))) / num_all
             elif self.loss_function == "svm_linear":
-                obj += sum(maximum(0, 1 - multiply(y, X * w))) / num_all
+                obj += sum_entries(maximum(0, 1 - multiply(y, X @ w))) / num_all
             else:
                 raise Exception("Invalid loss function")
 
@@ -133,9 +141,8 @@ class LinearClf:
             if cons_type == -1:  # no constraint
                 pass
             elif cons_type == 0:  # disp imp with single boundary
-                cov_thresh = np.abs(
-                    0.0
-                )  # perfect fairness -- see our AISTATS paper for details
+                # perfect fairness -- see our AISTATS paper for details
+                cov_thresh = np.abs(0.0)
                 constraints += self.get_di_cons_single_boundary(
                     X, y, x_sensitive, w, cov_thresh
                 )
@@ -150,19 +157,17 @@ class LinearClf:
 
         prob = Problem(Minimize(obj), constraints)
         # print "Problem is DCP (disciplined convex program):", prob.is_dcp()
-        # print "Problem is DCCP (disciplined convex-concave program):", is_dccp(prob)
+        print(
+            f"Problem is DCCP (disciplined convex-concave program): {dccp.is_dccp(prob)}"
+        )
 
         """
             Solving the problem
         """
 
         try:
-
-            tau, mu, EPS = (
-                0.5,
-                1.2,
-                1e-4,
-            )  # default dccp parameters, need to be varied per dataset
+            # default dccp parameters, need to be varied per dataset
+            tau, mu, EPS = (0.5, 1.2, 1e-4)
             if (
                 cons_params is not None
             ):  # in case we passed these parameters as a part of dccp constraints
@@ -195,7 +200,7 @@ class LinearClf:
             # check that the fairness constraint is satisfied
             for f_c in constraints:
                 try:
-                    assert f_c.value is True
+                    assert f_c.value() == True
                 except:
                     print("Assertion failed. Fairness constraints not satisfied.")
                     print(traceback.print_exc())
@@ -213,7 +218,7 @@ class LinearClf:
             Storing the results 
         """
 
-        if self.train_multiple is True:
+        if self.train_multiple:
             self.w = {}
             for k in set(x_sensitive):
                 self.w[k] = np.array(
@@ -263,17 +268,17 @@ class LinearClf:
         if not isinstance(self.w, dict):  # we have one model for the whole data
             distance_boundary_arr = self.decision_function(X)
 
-            for attr in set(
-                x_sensitive
-            ):  # there is only one boundary, so the results with this_group and other_group boundaries are the same
+            # there is only one boundary, so the results with this_group and other_group boundaries
+            # are the same
+            for attr in set(x_sensitive):
 
                 distances_boundary_dict[attr] = {}
                 idx = x_sensitive == attr
 
                 for k in set(x_sensitive):
-                    distances_boundary_dict[attr][k] = self.decision_function(
-                        X[idx]
-                    )  # apply same decision function for all the sensitive attrs because same w is trained for everyone
+                    # apply same decision function for all the sensitive attrs because same w is
+                    # trained for everyone
+                    distances_boundary_dict[attr][k] = self.decision_function(X[idx])
 
         else:  # w is a dict
             distance_boundary_arr = np.zeros(X.shape[0])
@@ -301,14 +306,14 @@ class LinearClf:
         Parity impact constraint
         """
 
-        assert self.train_multiple is False  # di cons is just for a single boundary clf
+        assert not self.train_multiple  # di cons is just for a single boundary clf
         assert cov_thresh >= 0  # covariance thresh has to be a small positive number
 
         constraints = []
         z_i_z_bar = x_sensitive - np.mean(x_sensitive)
 
-        fx = X * w
-        prod = sum(multiply(z_i_z_bar, fx)) / X.shape[0]
+        fx = X @ w
+        prod = sum_entries(multiply(z_i_z_bar, fx)) / X.shape[0]
 
         constraints.append(prod <= cov_thresh)
         constraints.append(prod >= -cov_thresh)
@@ -334,7 +339,7 @@ class LinearClf:
                 num_g = X_g.shape[0]
 
                 for k in w:  # get the distance with each group's w
-                    prod_dict[val][k] = sum(maximum(0, X_g * w[k])) / num_g
+                    prod_dict[val][k] = sum_entries(maximum(0, X_g * w[k])) / num_g
 
         else:
             raise Exception("Invalid constraint type")

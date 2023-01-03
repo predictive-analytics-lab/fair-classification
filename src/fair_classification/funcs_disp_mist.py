@@ -1,16 +1,20 @@
-import sys
-import traceback
 from copy import deepcopy
 from random import seed
+import sys
+import traceback
+from typing import Dict, List, Optional, Union
 
-import matplotlib.pyplot as plt
-import numpy as np
-import utils as ut
-from cvxpy import logistic, minimum, multiply, sum
-from cvxpy.settings import ECOS
+from cvxpy import logistic, minimum, multiply, sum as sum_entries
 from cvxpy.expressions.variable import Variable
 from cvxpy.problems.objective import Minimize
 from cvxpy.problems.problem import Problem
+import dccp
+import numpy as np
+import numpy.typing as npt
+
+from src.types import ConsParams, ConsType, LossFunction
+
+from . import utils as ut
 
 SEED = 1122334455
 # set the random seed so that the random permutations can be reproduced again
@@ -18,7 +22,14 @@ seed(SEED)
 np.random.seed(SEED)
 
 
-def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None):
+def train_model_disp_mist(
+    x: npt.NDArray,
+    y: npt.NDArray,
+    x_control: Dict[str, List[int]],
+    loss_function: LossFunction,
+    EPS: float,
+    cons_params: Optional[ConsParams] = None,
+):
 
     # cons_type, sensitive_attrs_to_cov_thresh, take_initial_sol, gamma, tau, mu, EPS, cons_type
     """
@@ -56,7 +67,8 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
 
     """
 
-    max_iters = 100  # for the convex program
+    # NOTE: the following value was changed from 100 to 200
+    max_iters = 200  # for the convex program
     max_iter_dccp = 50  # for the dccp algo
 
     num_points, num_features = x.shape
@@ -80,20 +92,17 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
 
     if loss_function == "logreg":
         # constructing the logistic loss problem
-        loss = (
-            sum(logistic(multiply(-y, x * w))) / num_points
-        )  # we are converting y to a diagonal matrix for consistent
+        # we are converting y to a diagonal matrix for consistent
+        loss = sum_entries(logistic(multiply(-y, x @ w))) / num_points
 
     # sometimes, its a good idea to give a starting point to the constrained solver
     # this starting point for us is the solution to the unconstrained optimization problem
     # another option of starting point could be any feasible solution
     if cons_params is not None:
-        if cons_params.get("take_initial_sol") is None:  # true by default
-            take_initial_sol = True
-        elif cons_params["take_initial_sol"] is False:
-            take_initial_sol = False
+        # true by default
+        take_initial_sol = cons_params.get("take_initial_sol", True)
 
-        if take_initial_sol is True:  # get the initial solution
+        if take_initial_sol:  # get the initial solution
             p = Problem(Minimize(loss), [])
             p.solve()
 
@@ -101,15 +110,19 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
     prob = Problem(Minimize(loss), constraints)
 
     # print "\n\n"
-    # print "Problem is DCP (disciplined convex program):", prob.is_dcp()
-    # print "Problem is DCCP (disciplined convex-concave program):", is_dccp(prob)
+    print(
+        f"Problem is DCP (disciplined convex program): {prob.is_dcp()}", file=sys.stderr
+    )
+    print(
+        f"Problem is DCCP (disciplined convex-concave program): {dccp.is_dccp(prob)}",
+        file=sys.stderr,
+    )
 
     try:
 
         tau, mu = 0.005, 1.2  # default dccp parameters, need to be varied per dataset
-        if (
-            cons_params is not None
-        ):  # in case we passed these parameters as a part of dccp constraints
+        # in case we passed these parameters as a part of dccp constraints
+        if cons_params is not None:
             if cons_params.get("tau") is not None:
                 tau = cons_params["tau"]
             if cons_params.get("mu") is not None:
@@ -120,9 +133,10 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
             tau=tau,
             mu=mu,
             tau_max=1e10,
-            solver=ECOS,
+            solver="ECOS",
             verbose=False,
-            feastol=EPS,
+            # NOTE: the following parameter was commented out
+            # feastol=EPS,
             abstol=EPS,
             reltol=EPS,
             feastol_inacc=EPS,
@@ -132,7 +146,7 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
             max_iter=max_iter_dccp,
         )
 
-        assert prob.status == "Converged" or prob.status == "optimal"
+        assert prob.status == "Converged" or prob.status == "optimal", f"{prob.status=}"
         # print "Optimization done, problem status:", prob.status
 
     except:
@@ -142,9 +156,9 @@ def train_model_disp_mist(x, y, x_control, loss_function, EPS, cons_params=None)
 
     # check that the fairness constraint is satisfied
     for f_c in constraints:
-        assert (
-            f_c.value is True
-        )  # can comment this out if the solver fails too often, but make sure that the constraints are satisfied empirically. alternatively, consider increasing tau parameter
+        # can comment this out if the solver fails too often, but make sure that the constraints
+        # are satisfied empirically. alternatively, consider increasing tau parameter
+        assert f_c.value() == True
         pass
 
     w = np.array(w.value).flatten()  # flatten converts it to a 1d array
@@ -164,9 +178,8 @@ def get_clf_stats(
 ):
 
     assert len(sensitive_attrs) == 1  # ensure that we have just one sensitive attribute
-    s_attr = sensitive_attrs[
-        0
-    ]  # for now, lets compute the accuracy for just one sensitive attr
+    # for now, lets compute the accuracy for just one sensitive attr
+    s_attr = sensitive_attrs[0]
 
     # compute distance from boundary
     distances_boundary_train = get_distance_boundary(
@@ -236,7 +249,9 @@ def get_clf_stats(
     )
 
 
-def get_distance_boundary(w, x, s_attr_arr):
+def get_distance_boundary(
+    w: Union[npt.NDArray, Dict[int, npt.NDArray]], x: npt.NDArray, s_attr_arr
+) -> npt.NDArray:
 
     """
     if we have boundaries per group, then use those separate boundaries for each sensitive group
@@ -247,16 +262,20 @@ def get_distance_boundary(w, x, s_attr_arr):
     if isinstance(w, dict):  # if we have separate weight vectors per group
         for k in w:  # for each w corresponding to each sensitive group
             d = np.dot(x, w[k])
-            distances_boundary[s_attr_arr == k] = d[
-                s_attr_arr == k
-            ]  # set this distance only for people with this sensitive attr val
+            # set this distance only for people with this sensitive attr val
+            distances_boundary[s_attr_arr == k] = d[s_attr_arr == k]
     else:  # we just learn one w for everyone else
         distances_boundary = np.dot(x, w)
     return distances_boundary
 
 
 def get_constraint_list_cov(
-    x_train, y_train, x_control_train, sensitive_attrs_to_cov_thresh, cons_type, w
+    x_train: npt.NDArray,
+    y_train: npt.NDArray,
+    x_control_train,
+    sensitive_attrs_to_cov_thresh: Dict[int, Dict[ConsType, List[int]]],
+    cons_type: ConsType,
+    w: Variable,
 ):
 
     """
@@ -278,17 +297,14 @@ def get_constraint_list_cov(
         attr_arr = x_control_train[attr]
         attr_arr_transformed, index_dict = ut.get_one_hot_encoding(attr_arr)
 
-        if (
-            index_dict is None
-        ):  # binary attribute, in this case, the attr_arr_transformed is the same as the attr_arr
+        # binary attribute, in this case, the attr_arr_transformed is the same as the attr_arr
+        if index_dict is None:
 
-            s_val_to_total = {
-                ct: {} for ct in [0, 1, 2]
-            }  # constrain type -> sens_attr_val -> total number
+            # constrain type -> sens_attr_val -> total number
+            s_val_to_total = {ct: {} for ct in [0, 1, 2]}
             s_val_to_avg = {ct: {} for ct in [0, 1, 2]}
-            cons_sum_dict = {
-                ct: {} for ct in [0, 1, 2]
-            }  # sum of entities (females and males) in constraints are stored here
+            # sum of entities (females and males) in constraints are stored here
+            cons_sum_dict = {ct: {} for ct in [0, 1, 2]}
 
             for v in set(attr_arr):
                 s_val_to_total[0][v] = sum(x_control_train[attr] == v)
@@ -300,9 +316,10 @@ def get_constraint_list_cov(
                 )
 
             for ct in [0, 1, 2]:
+                # N1/N in our formulation, differs from one constraint type to another
                 s_val_to_avg[ct][0] = s_val_to_total[ct][1] / float(
                     s_val_to_total[ct][0] + s_val_to_total[ct][1]
-                )  # N1/N in our formulation, differs from one constraint type to another
+                )
                 s_val_to_avg[ct][1] = 1.0 - s_val_to_avg[ct][0]  # N0/N
 
             for v in set(attr_arr):
@@ -311,23 +328,23 @@ def get_constraint_list_cov(
 
                 #################################################################
                 # #DCCP constraints
-                dist_bound_prod = multiply(y_train[idx], x_train[idx] * w)  # y.f(x)
+                dist_bound_prod = multiply(y_train[idx], x_train[idx] @ w)  # y.f(x)
 
-                cons_sum_dict[0][v] = sum(minimum(0, dist_bound_prod)) * (
+                # avg misclassification distance from boundary
+                cons_sum_dict[0][v] = sum_entries(minimum(0, dist_bound_prod)) * (
                     s_val_to_avg[0][v] / len(x_train)
-                )  # avg misclassification distance from boundary
-                cons_sum_dict[1][v] = sum(
+                )
+                # avg false positive distance from boundary (only operates on the ground truth neg dataset)
+                cons_sum_dict[1][v] = sum_entries(
                     minimum(0, multiply((1 - y_train[idx]) / 2.0, dist_bound_prod))
-                ) * (
-                    s_val_to_avg[1][v] / sum(y_train == -1)
-                )  # avg false positive distance from boundary (only operates on the ground truth neg dataset)
-                cons_sum_dict[2][v] = sum(
+                ) * (s_val_to_avg[1][v] / sum(y_train == -1))
+                # avg false negative distance from boundary
+                cons_sum_dict[2][v] = sum_entries(
                     minimum(0, multiply((1 + y_train[idx]) / 2.0, dist_bound_prod))
-                ) * (
-                    s_val_to_avg[2][v] / sum(y_train == +1)
-                )  # avg false negative distance from boundary
+                ) * (s_val_to_avg[2][v] / sum(y_train == +1))
                 #################################################################
 
+            cts: List[ConsType]
             if cons_type == 4:
                 cts = [1, 2]
             elif cons_type in [0, 1, 2]:
@@ -357,13 +374,12 @@ def get_constraint_list_cov(
             raise Exception(
                 "Fill the constraint code for categorical sensitive features... Exiting..."
             )
-            sys.exit(1)
 
     return constraints
 
 
 def get_fpr_fnr_sensitive_features(
-    y_true, y_pred, x_control, sensitive_attrs, verbose=False
+    y_true, y_pred, x_control, sensitive_attrs, verbose: bool = False
 ):
 
     # we will make some changes to x_control in this function, so make a copy in order to preserve the origianl referenced object
@@ -374,35 +390,31 @@ def get_fpr_fnr_sensitive_features(
     for s in sensitive_attrs:
         s_attr_to_fp_fn[s] = {}
         s_attr_vals = x_control_internal[s]
-        if verbose is True:
+        if verbose:
             print("||  s  || FPR. || FNR. ||")
         for s_val in sorted(list(set(s_attr_vals))):
             s_attr_to_fp_fn[s][s_val] = {}
             y_true_local = y_true[s_attr_vals == s_val]
             y_pred_local = y_pred[s_attr_vals == s_val]
 
-            acc = float(sum(y_true_local == y_pred_local)) / len(y_true_local)
+            # acc = float(sum(y_true_local == y_pred_local)) / len(y_true_local)
 
-            fp = sum(
-                np.logical_and(y_true_local == -1.0, y_pred_local == +1.0)
-            )  # something which is -ve but is misclassified as +ve
-            fn = sum(
-                np.logical_and(y_true_local == +1.0, y_pred_local == -1.0)
-            )  # something which is +ve but is misclassified as -ve
-            tp = sum(
-                np.logical_and(y_true_local == +1.0, y_pred_local == +1.0)
-            )  # something which is +ve AND is correctly classified as +ve
-            tn = sum(
-                np.logical_and(y_true_local == -1.0, y_pred_local == -1.0)
-            )  # something which is -ve AND is correctly classified as -ve
+            # something which is -ve but is misclassified as +ve
+            fp = sum(np.logical_and(y_true_local == -1.0, y_pred_local == +1.0))
+            # something which is +ve but is misclassified as -ve
+            fn = sum(np.logical_and(y_true_local == +1.0, y_pred_local == -1.0))
+            # something which is +ve AND is correctly classified as +ve
+            tp = sum(np.logical_and(y_true_local == +1.0, y_pred_local == +1.0))
+            # something which is -ve AND is correctly classified as -ve
+            tn = sum(np.logical_and(y_true_local == -1.0, y_pred_local == -1.0))
 
-            all_neg = sum(y_true_local == -1.0)
-            all_pos = sum(y_true_local == +1.0)
+            # all_neg = sum(y_true_local == -1.0)
+            # all_pos = sum(y_true_local == +1.0)
 
             fpr = float(fp) / float(fp + tn)
             fnr = float(fn) / float(fn + tp)
-            tpr = float(tp) / float(tp + fn)
-            tnr = float(tn) / float(tn + fp)
+            # tpr = float(tp) / float(tp + fn)
+            # tnr = float(tn) / float(tn + fp)
 
             s_attr_to_fp_fn[s][s_val]["fp"] = fp
             s_attr_to_fp_fn[s][s_val]["fn"] = fn
@@ -410,10 +422,9 @@ def get_fpr_fnr_sensitive_features(
             s_attr_to_fp_fn[s][s_val]["fnr"] = fnr
 
             s_attr_to_fp_fn[s][s_val]["acc"] = (tp + tn) / (tp + tn + fp + fn)
-            if verbose is True:
-                if isinstance(
-                    s_val, float
-                ):  # print the int value of the sensitive attr val
+            if verbose:
+                # print the int value of the sensitive attr val
+                if isinstance(s_val, float):
                     s_val = int(s_val)
                 print("||  {}  || {:0.2f} || {:0.2f} ||".format(s_val, fpr, fnr))
 
@@ -453,9 +464,8 @@ def get_sensitive_attr_constraint_fpr_fnr_cov(
     if model is None:
         arr = y_arr_dist_boundary * y_arr_true  # simply the output labels
     else:
-        arr = (
-            np.dot(model, x_arr.T) * y_arr_true
-        )  # the product with the weight vector -- the sign of this is the output label
+        # the product with the weight vector -- the sign of this is the output label
+        arr = np.dot(model, x_arr.T) * y_arr_true
     arr = np.array(arr)
 
     s_val_to_total = {ct: {} for ct in [0, 1, 2]}
@@ -470,10 +480,12 @@ def get_sensitive_attr_constraint_fpr_fnr_cov(
         s_val_to_total[2][v] = sum(np.logical_and(x_control_arr == v, y_arr_true == +1))
 
     for ct in [0, 1, 2]:
+        # N1 / N
         s_val_to_avg[ct][0] = s_val_to_total[ct][1] / float(
             s_val_to_total[ct][0] + s_val_to_total[ct][1]
-        )  # N1 / N
-        s_val_to_avg[ct][1] = 1.0 - s_val_to_avg[ct][0]  # N0 / N
+        )
+        # N0 / N
+        s_val_to_avg[ct][1] = 1.0 - s_val_to_avg[ct][0]
 
     for v in set(x_control_arr):
         idx = x_control_arr == v
@@ -493,13 +505,14 @@ def get_sensitive_attr_constraint_fpr_fnr_cov(
     for cons_type in [0, 1, 2]:
         cov_type_name = cons_type_to_name[cons_type]
         cov = cons_sum_dict[cons_type][1] - cons_sum_dict[cons_type][0]
-        if verbose is True:
+        if verbose:
             print("Covariance for type '{}' is: {:0.7f}".format(cov_type_name, cov))
 
     return cons_sum_dict
 
 
 def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_type):
+    import matplotlib.pyplot as plt
 
     # very the covariance threshold using a range of decreasing multiplicative factors and see the tradeoffs between accuracy and fairness
     it = 0.2
@@ -512,10 +525,10 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
     # values are not needed for reverse constraint
     (
         test_acc_arr,
-        train_acc_arr,
+        _,
         correlation_dict_test_arr,
         correlation_dict_train_arr,
-        cov_dict_test_arr,
+        _,
         cov_dict_train_arr,
     ) = compute_cross_validation_error(
         x_all,
@@ -598,7 +611,7 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
     ax.set_xlim([min(cov_range), max(cov_range)])
     plt.xlabel("Multiplicative loss factor")
     plt.ylabel("Perc. in positive class")
-    if apply_accuracy_constraint is False:
+    if not apply_accuracy_constraint:
         plt.gca().invert_xaxis()
         plt.xlabel("Multiplicative covariance factor (c)")
     ax.legend()

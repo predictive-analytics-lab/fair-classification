@@ -57,9 +57,8 @@ def train_model(
 
     """
 
-    assert (
-        apply_accuracy_constraint == 1 and apply_fairness_constraints == 1
-    ) is False  # both constraints cannot be applied at the same time
+    # both constraints cannot be applied at the same time
+    assert not (apply_accuracy_constraint == 1 and apply_fairness_constraints == 1)
 
     max_iter = 100000  # maximum number of iterations for the minimization algorithm
 
@@ -77,9 +76,7 @@ def train_model(
         f_args = (x, y)
         w = minimize(
             fun=loss_function,
-            x0=np.random.rand(
-                x.shape[1],
-            ),
+            x0=np.random.rand(x.shape[1]),
             args=f_args,
             method="SLSQP",
             options={"maxiter": max_iter},
@@ -91,9 +88,7 @@ def train_model(
         # train on just the loss function
         w = minimize(
             fun=loss_function,
-            x0=np.random.rand(
-                x.shape[1],
-            ),
+            x0=np.random.rand(x.shape[1]),
             args=(x, y),
             method="SLSQP",
             options={"maxiter": max_iter},
@@ -109,9 +104,10 @@ def train_model(
             old_loss = sum(initial_loss_arr)
             return ((1.0 + gamma) * old_loss) - new_loss
 
-        def constraint_protected_people(
-            w, x, y
-        ):  # dont confuse the protected here with the sensitive feature protected/non-protected values -- protected here means that these points should not be misclassified to negative class
+        def constraint_protected_people(w, x):
+            # dont confuse the protected here with the sensitive feature protected/non-protected
+            # values -- protected here means that these points should not be misclassified to
+            # negative class
             return np.dot(w, x.T)  # if this is positive, the constraint is satisfied
 
         def constraint_unprotected_people(w, ind, old_loss, x, y):
@@ -123,7 +119,7 @@ def train_model(
         predicted_labels = np.sign(np.dot(w.x, x.T))
         unconstrained_loss_arr = loss_function(w.x, x, y, return_arr=True)
 
-        if sep_constraint is True:  # separate gemma for different people
+        if sep_constraint:  # separate gemma for different people
             for i in range(0, len(predicted_labels)):
                 if (
                     predicted_labels[i] == 1.0
@@ -166,7 +162,7 @@ def train_model(
         )
 
     try:
-        assert w.success is True
+        assert w.success
     except:
         print(
             "Optimization problem did not converge.. Check the solution returned by the optimizer."
@@ -525,7 +521,7 @@ def test_sensitive_attr_constraint_cov(
         cov
     )  # will be <0 if the covariance is greater than thresh -- that is, the condition is not satisfied
     # ans = thresh - cov # will be <0 if the covariance is greater than thresh -- that is, the condition is not satisfied
-    if verbose is True:
+    if verbose:
         print("Covariance is", cov)
         print("Diff is:", ans)
         print()
@@ -553,12 +549,10 @@ def print_covariance_sensitive_attrs(
 
         attr_arr = x_control[attr]
 
-        bin_attr = check_binary(
-            attr_arr
-        )  # check if the attribute is binary (0/1), or has more than 2 vals
-        if (
-            bin_attr is False
-        ):  # if its a non-binary sensitive feature, then perform one-hot-encoding
+        # check if the attribute is binary (0/1), or has more than 2 vals
+        bin_attr = check_binary(attr_arr)
+        # if its a non-binary sensitive feature, then perform one-hot-encoding
+        if not bin_attr:
             attr_arr_transformed, index_dict = get_one_hot_encoding(attr_arr)
 
         thresh = 0
@@ -742,11 +736,11 @@ def plot_cov_thresh_vs_acc_pos_ratio(
     # very the covariance threshold using a range of decreasing multiplicative factors and see the tradeoffs between accuracy and fairness
     it = 0.05
     cov_range = np.arange(1.0, 0.0 - it, -it).tolist()
-    if apply_accuracy_constraint is True:
-        if sep_constraint is False:
+    if apply_accuracy_constraint:
+        if not sep_constraint:
             it = 0.1
             cov_range = np.arange(0.0, 1.0 + it, it).tolist()
-        if sep_constraint is True:
+        if sep_constraint:
             cov_range = [0, 1, 5, 10, 20, 50, 100, 500, 1000]
 
     positive_class_label = 1  # positive class is +1
@@ -844,7 +838,7 @@ def plot_cov_thresh_vs_acc_pos_ratio(
     ax.set_xlim([min(cov_range), max(cov_range)])
     plt.xlabel("Multiplicative loss factor")
     plt.ylabel("Perc. in positive class")
-    if apply_accuracy_constraint is False:
+    if not apply_accuracy_constraint:
         plt.gca().invert_xaxis()
         plt.xlabel("Multiplicative covariance factor (c)")
     ax.legend()
