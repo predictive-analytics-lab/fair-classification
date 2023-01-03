@@ -1,29 +1,13 @@
-[tool.poetry]
+[project]
 name = "fair-classification"
-version = "0.1.0"
-description = "Fairness method by Zafar et al."
-authors = ["Zafar et al."]
-license = "GPL v3"
-readme = "README.md"
-packages = [{include = "fair_classification"}]
-
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-CVXcanon = "^0.1.2"
-cvxpy = "^1.2.2"
-dill = "^0.3.6"
-scikit-learn = "^1.2.0"
-scipy = "^1.9.3"
-setuptools = "58"
-pip = "19.3.1"
-dccp = "1.0.3"
-matplotlib = "^3.6.2"
-
-[tool.poetry.group.dev.dependencies]
-black = "^22.12.0"
-isort = "^5.10.1"
-mypy = "^0.991"
-ruff = "^0.0.177"
+version = ""
+description = ""
+authors = [
+    {name = "Zafar et al."},
+]
+dependencies = ["scikit-learn==1.2.0", "cvxpy==1.2.2", "dccp==1.0.3", "scipy==1.9.3", "typing-extensions==4.4.0"]
+requires-python = ">=3.8"
+license = {text = "GPLv3"}
 
 [tool.ruff]
 extend-select = ["SIM"]
@@ -43,6 +27,13 @@ reportUnknownArgumentType = "none"
 [tool.isort]
 profile = "black"
 
+[tool.pdm]
+[tool.pdm.build]
+includes = ["src"]
+
+[tool.pdm.dev-dependencies]
+dev = []
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
