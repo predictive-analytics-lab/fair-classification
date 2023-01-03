@@ -1,3 +1,6 @@
 *.pyc
 *~
 /.env/
+/.venv/
+/dccp.log
+/model.npy
