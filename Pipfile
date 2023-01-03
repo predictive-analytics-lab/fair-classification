@@ -6,11 +6,10 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-scikit-learn = "==0.19.1"
-cvxpy = "==0.4.11"
-dccp = "==0.1.6"
-numpy = "==1.16.4"
-scipy = "==1.2.2"
+scikit-learn = "==1.2.0"
+cvxpy = "==1.2.2"
+dccp = "==1.0.3"
+scipy = "==1.9.3"
 
 [requires]
-python_version = "2.7"
+python_version = ">=3.8,<3.11"

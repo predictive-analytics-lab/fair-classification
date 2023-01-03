@@ -503,7 +503,7 @@ def plot_fairness_acc_tradeoff(x_all, y_all, x_control_all, loss_function, cons_
 
     # very the covariance threshold using a range of decreasing multiplicative factors and see the tradeoffs between accuracy and fairness
     it = 0.2
-    mult_range = np.arange(1.0, 0.0 - it, -it).tolist()
+    cov_range = np.arange(1.0, 0.0 - it, -it).tolist()
 
     positive_class_label = 1  # positive class is +1
     test_acc = []
