@@ -2,9 +2,12 @@ from collections import defaultdict
 from copy import deepcopy
 from multiprocessing import Process, Queue
 from random import seed, shuffle
+from typing import List, Literal, Optional
 
 import numpy as np
 from scipy.optimize import minimize  # for loss func minimization
+
+from src.types import Constraint
 
 SEED = 1122334455
 # set the random seed so that the random permutations can be reproduced again
@@ -17,12 +20,12 @@ def train_model(
     y,
     x_control,
     loss_function,
-    apply_fairness_constraints,
-    apply_accuracy_constraint,
+    apply_fairness_constraints: Literal[0, 1],
+    apply_accuracy_constraint: Literal[0, 1],
     sep_constraint,
-    sensitive_attrs,
+    sensitive_attrs: List[str],
     sensitive_attrs_to_cov_thresh,
-    gamma=None,
+    gamma: Optional[float] = None,
 ):
 
     """
@@ -69,10 +72,8 @@ def train_model(
             x, y, x_control, sensitive_attrs, sensitive_attrs_to_cov_thresh
         )
 
-    if (
-        apply_accuracy_constraint == 0
-    ):  # its not the reverse problem, just train w with cross cov constraints
-
+    if apply_accuracy_constraint == 0:
+        # its not the reverse problem, just train w with cross cov constraints
         f_args = (x, y)
         w = minimize(
             fun=loss_function,
@@ -115,10 +116,11 @@ def train_model(
             new_loss = loss_function(w, np.array([x]), np.array(y))
             return ((1.0 + gamma) * old_loss) - new_loss
 
-        constraints = []
+        constraints: List[Constraint] = []
         predicted_labels = np.sign(np.dot(w.x, x.T))
         unconstrained_loss_arr = loss_function(w.x, x, y, return_arr=True)
 
+        c: Constraint
         if sep_constraint:  # separate gemma for different people
             for i in range(0, len(predicted_labels)):
                 if (
@@ -130,14 +132,13 @@ def train_model(
                         "fun": constraint_protected_people,
                         "args": (x[i], y[i]),
                     }  # this constraint makes sure that these people stay in the positive class even in the modified classifier
-                    constraints.append(c)
                 else:
                     c = {
                         "type": "ineq",
                         "fun": constraint_unprotected_people,
                         "args": (i, unconstrained_loss_arr[i], x[i], y[i]),
                     }
-                    constraints.append(c)
+                constraints.append(c)
         else:  # same gamma for everyone
             c = {
                 "type": "ineq",

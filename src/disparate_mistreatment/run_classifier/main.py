@@ -1,13 +1,15 @@
 import json
 import sys
+from typing import Optional
 
 import numpy as np
 
 import src.fair_classification.funcs_disp_mist as fdm
 import src.fair_classification.utils as ut
+from src.types import ConsParams, Mode, SensitiveAttrsToCovThresh
 
 
-def train_classifier(x, y, control, cons_params, eps):
+def train_classifier(x, y, control, cons_params: ConsParams, eps: float):
     loss_function = "logreg"  # only logistic regression is implemented
     w = fdm.train_model_disp_mist(x, y, control, loss_function, eps, cons_params)
     return w
@@ -17,7 +19,7 @@ def predict(model, x):
     return np.sign(np.dot(x, model))
 
 
-def load_json(filename):
+def load_json(filename: str):
     f = json.load(open(filename))
     x = np.array(f["x"])
     y = np.array(f["class"])
@@ -25,7 +27,15 @@ def load_json(filename):
     return x, y, sensitive
 
 
-def main(train_file, test_file, output_file, mode, tau="5.0", mu="1.2", eps="0.0001"):
+def main(
+    train_file: str,
+    test_file: str,
+    output_file: str,
+    mode: Mode,
+    tau="5.0",
+    mu="1.2",
+    eps="0.0001",
+):
     """
 
     Args:
@@ -42,7 +52,7 @@ def main(train_file, test_file, output_file, mode, tau="5.0", mu="1.2", eps="0.0
              default for CVXPY is 1e-6
     """
     x_train, y_train, x_control_train = load_json(train_file)
-    x_test, y_test, x_control_test = load_json(test_file)
+    x_test, _, _ = load_json(test_file)
 
     # X = ut.add_intercept(X) # add intercept to X before applying the linear classifier
     x_train = ut.add_intercept(x_train)
@@ -56,28 +66,29 @@ def main(train_file, test_file, output_file, mode, tau="5.0", mu="1.2", eps="0.0
     sensitive_attrs = list(x_control_train.keys())
     sensitive_attr = str(sensitive_attrs[0])
 
-    sensitive_attrs_to_cov_thresh = {
+    sensitive_attrs_to_cov_thresh: SensitiveAttrsToCovThresh = {
         sensitive_attr: {0: {0: 0, 1: 0}, 1: {0: 0, 1: 0}, 2: {0: 0, 1: 0}}
     }
-    cons_params = {
-        "tau": float(tau),
-        "mu": float(mu),
-        "sensitive_attrs_to_cov_thresh": sensitive_attrs_to_cov_thresh,
-    }
 
-    if mode == "fpr":
-        cons_type = 1
-        cons_params["cons_type"] = cons_type
-    elif mode == "fnr":
-        cons_type = 2
-        cons_params["cons_type"] = cons_type
-    elif mode == "fprfnr":
-        cons_type = 4
-        cons_params["cons_type"] = cons_type
-    elif mode == "baseline":
+    cons_params: Optional[ConsParams]
+    if mode == "baseline":
         cons_params = None
     else:
-        raise Exception("Don't know how to handle setting %s" % mode)
+        if mode == "fpr":
+            cons_type = 1
+        elif mode == "fnr":
+            cons_type = 2
+        elif mode == "fprfnr":
+            cons_type = 4
+        else:
+            raise Exception("Don't know how to handle setting %s" % mode)
+
+        cons_params = {
+            "tau": float(tau),
+            "mu": float(mu),
+            "sensitive_attrs_to_cov_thresh": sensitive_attrs_to_cov_thresh,
+            "cons_type": cons_type,
+        }
 
     # print("Will train classifier on %s %s-d points" % x_train.shape, file=sys.stderr)
     # print("Sensitive attribute: %s" % (x_control_train.keys(),), file=sys.stderr)
@@ -87,9 +98,9 @@ def main(train_file, test_file, output_file, mode, tau="5.0", mu="1.2", eps="0.0
     # print("Model trained successfully.", file=sys.stderr)
 
     predictions = predict(w, x_test).tolist()
-    output_file = open(output_file, "w")
-    json.dump(predictions, output_file)
-    output_file.close()
+    output_fp = open(output_file, "w")
+    json.dump(predictions, output_fp)
+    output_fp.close()
 
 
 if __name__ == "__main__":

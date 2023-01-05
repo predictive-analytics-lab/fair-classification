@@ -102,7 +102,7 @@ def train_model_disp_mist(
         # true by default
         take_initial_sol = cons_params.get("take_initial_sol", True)
 
-        if take_initial_sol:  # get the initial solution
+        if take_initial_sol == True:  # get the initial solution
             p = Problem(Minimize(loss), [])
             p.solve()
 
