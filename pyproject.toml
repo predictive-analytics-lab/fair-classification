@@ -23,6 +23,7 @@ reportUnknownMemberType = "none"
 reportUnknownVariableType = "none"
 reportUnknownParameterType = "none"
 reportUnknownArgumentType = "none"
+extraPaths = ["__pypackages__/3.10/lib/"]
 
 [tool.isort]
 profile = "black"
